@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34202.233
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JAPI", "JAPI\JAPI.csproj", "{2078B16B-787D-4E39-BCB2-41247F4D8A63}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JAPI", "JAPI\JAPI.csproj", "{A20400DC-966C-43D5-AD3F-AC0C713B908C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2078B16B-787D-4E39-BCB2-41247F4D8A63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2078B16B-787D-4E39-BCB2-41247F4D8A63}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2078B16B-787D-4E39-BCB2-41247F4D8A63}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2078B16B-787D-4E39-BCB2-41247F4D8A63}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A20400DC-966C-43D5-AD3F-AC0C713B908C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A20400DC-966C-43D5-AD3F-AC0C713B908C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A20400DC-966C-43D5-AD3F-AC0C713B908C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A20400DC-966C-43D5-AD3F-AC0C713B908C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {2B7D517B-66AD-4326-A86E-BAB6B6B62009}
+		SolutionGuid = {BFE9FC24-89D0-4122-BF96-72A7F5702732}
 	EndGlobalSection
 EndGlobal
