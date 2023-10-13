@@ -27,7 +27,7 @@ app.MapGet("/", (HttpContext ctx) =>
     TelemetryHandler telemetryHandler = new TelemetryHandler();
     object telemetry = telemetryHandler.GetTelemetry();
   
-    return object;
+    return telemetry;
 })
 .WithName("Root")
 .WithOpenApi();
