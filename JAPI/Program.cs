@@ -18,11 +18,16 @@ if (app.Environment.IsDevelopment())
 #endregion
 
 #region Endpoints
-app.MapGet("/", () => {
-    TelemetryHandler telemetryHandler = new TelemetryHandler();
-    string jsonPayload = telemetryHandler.GetTelemetry();
+app.MapGet("/", (HttpContext ctx) =>
+{
+    /* Configure the response */
+    ctx.Response.StatusCode = StatusCodes.Status200OK;
 
-    return Results.Ok(jsonPayload);
+    /* Payload */
+    TelemetryHandler telemetryHandler = new TelemetryHandler();
+    object telemetry = telemetryHandler.GetTelemetry();
+  
+    return telemetryHandler.GetTelemetry();
 })
 .WithName("Root")
 .WithOpenApi();

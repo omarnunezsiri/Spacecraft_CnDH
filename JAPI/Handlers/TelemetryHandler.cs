@@ -1,14 +1,12 @@
-﻿using System.Text.Json;
-
-namespace JAPI.Handlers
+﻿namespace JAPI.Handlers
 {
     public class TelemetryHandler
     {
         private readonly Telemetry telemetry = Telemetry.Instance;
-        public string GetTelemetry()
+        public object GetTelemetry()
         {
             telemetry.Sample = 50;
-            return JsonSerializer.Serialize(telemetry);
+            return telemetry;
         }
 
         /* Simulation */
