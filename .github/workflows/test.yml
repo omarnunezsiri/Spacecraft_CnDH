@@ -1,6 +1,6 @@
 name: Dotnet Build and Test Project
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   build:

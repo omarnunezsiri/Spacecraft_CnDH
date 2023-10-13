@@ -1,3 +1,5 @@
+// The Spacecraft C&DH Team licenses this file to you under the MIT license.
+
 using JAPI.Handlers;
 
 #region Config
@@ -26,7 +28,7 @@ app.MapGet("/", (HttpContext ctx) =>
     /* Payload */
     TelemetryHandler telemetryHandler = new TelemetryHandler();
     object telemetry = telemetryHandler.GetTelemetry();
-  
+
     return telemetry;
 })
 .WithName("Root")

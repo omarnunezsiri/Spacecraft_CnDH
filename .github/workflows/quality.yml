@@ -1,0 +1,21 @@
+name: Format Check
+
+on: [push, pull_request]
+
+
+
+jobs:
+  format-check:
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        dotnet-version: [ '6.0.x', '7.0.x' ]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Check Code Formatting
+        run: dotnet format --verify-no-changes

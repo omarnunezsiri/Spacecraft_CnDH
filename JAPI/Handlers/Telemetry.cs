@@ -1,9 +1,10 @@
-﻿namespace JAPI.Handlers
-{
-    public class Telemetry
-    {
-        public int Sample { get; set; }
+// The Spacecraft C&DH Team licenses this file to you under the MIT license.
 
-        public static Telemetry Instance { get; } = new Telemetry();
-    }
+namespace JAPI.Handlers;
+
+public class Telemetry
+{
+    public int Sample { get; set; }
+
+    public static Telemetry Instance { get; } = new Telemetry();
 }
