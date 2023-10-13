@@ -82,12 +82,12 @@ public class Status
 /// The Telemetry class will contain all of the data that needs to be tracked/maintained
 /// </summary>
 public class Telemetry
-{ 
+{
     public int Sample { get; set; }
     public Coordinate? coordinate { get; set; }
     public Rotation? rotation { get; set; }
     public float fuel { get; set; }
-    public float temp {  get; set; }
+    public float temp { get; set; }
     public Status? status { get; set; }
     public static Telemetry Instance { get; } = new Telemetry();
 }
