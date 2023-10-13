@@ -13,7 +13,14 @@ public class FileHandler
     //Me and hayden will both be implemetning in this file. So here are some lines to stop merge conflicts
 
     //***********Talon Code*****
+    /// <summary>
+    /// This method reads from the given file to read in all IP Addresses and Service IDs
+    /// </summary>
+    /// <param name="fileName">File to read from</param>
+    public void ReadIpConfigFile(string fileName)
+    {
 
+    }
     //**************************
 
     //***********Hayden Code*****

@@ -4,8 +4,9 @@ using JAPI.Handlers;
 
 #region Setup
 //This is where any setup code will go.
-
-//TODO: Read from config file and put in Dictionary
+FileHandler fileHandler = FileHandler.GetFileHandler();
+//TODO: Implement this ReadfIpConfigFile method
+fileHandler.ReadIpConfigFile("ips.cfg");
 
 #endregion
 
