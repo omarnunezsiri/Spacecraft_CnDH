@@ -2,6 +2,13 @@
 
 using JAPI.Handlers;
 
+#region Setup
+//This is where any setup code will go.
+
+//TODO: Read from config file and put in Dictionary
+
+#endregion
+
 #region Config
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +34,7 @@ app.MapGet("/", (HttpContext ctx) =>
 
     /* Payload */
     TelemetryHandler telemetryHandler = new TelemetryHandler();
+
     object telemetry = telemetryHandler.GetTelemetry();
 
     return telemetry;

@@ -90,6 +90,9 @@ public class Telemetry
     public float temp { get; set; }
     public Status? status { get; set; }
     public static Telemetry Instance { get; } = new Telemetry();
+
+    private Telemetry() { }
+
 }
 #endregion
 #endregion
