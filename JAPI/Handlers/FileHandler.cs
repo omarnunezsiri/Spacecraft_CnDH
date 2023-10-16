@@ -26,9 +26,13 @@ public class FileHandler
             {
                 while (!sr.EndOfStream)
                 {
-                    string? line = sr.ReadLine().Trim();
-                    string[] serviceInformation = line.Split(',');
-                    serviceDictionary.Add(int.Parse(serviceInformation[1]), serviceInformation[0]);
+                    string? line = sr.ReadLine();
+                    if (!String.IsNullOrEmpty(line))
+                    {
+                        line.Trim();
+                        string[] serviceInformation = line.Split(',');
+                        serviceDictionary.Add(int.Parse(serviceInformation[1]), serviceInformation[0]);
+                    }
                 }
             }
         }
