@@ -26,15 +26,15 @@ public class FileHandler
             {
                 while (!sr.EndOfStream)
                 {
-                    string? line = sr.ReadLine();
+                    string? line = sr.ReadLine().Trim();
                     string[] serviceInformation = line.Split(',');
-                    int.TryParse(serviceInformation[0], out int serviceID);
-                    serviceDictionary.Add(serviceID, serviceInformation[1]);
-                }         
+                    serviceDictionary.Add(int.Parse(serviceInformation[1]), serviceInformation[0]);
+                }
             }
         }
-        catch (FileNotFoundException) { Console.WriteLine($"Could not find the following file attempting to be opened: {fileName}"); }
-        catch (IOException) { Console.WriteLine($"There was an error trying to perform IO operations on the following file: {fileName}"); }
+        catch (FileNotFoundException) { Console.WriteLine($"Could not find the following file attempting to be opened: {fileName}"); serviceDictionary.Clear(); }
+        catch (IOException) { Console.WriteLine($"There was an error trying to perform IO operations on the following file: {fileName}"); serviceDictionary.Clear(); }
+        catch (Exception) { Console.WriteLine("Something has went wrong with the ReadIpConfigFile method in FileHandler."); serviceDictionary.Clear(); }
         return serviceDictionary;
     }
     //**************************
