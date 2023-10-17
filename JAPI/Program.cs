@@ -5,13 +5,12 @@ using JAPI.Handlers;
 #region Setup
 //This is where any setup code will go.
 FileHandler fileHandler = FileHandler.GetFileHandler();
-//TODO: Implement this ReadfIpConfigFile method
-Dictionary<int, string> serviceDictionary = fileHandler.ReadIpConfigFile("ips.cfg");
-if (!serviceDictionary.Any())
+Dictionary<int, string> serviceDictionary = new Dictionary<int, string>();
+try
 {
-    Console.WriteLine("The program is unable to continue due to IO opertions not being successful. Now closing.");
-    Environment.Exit(1);
+    serviceDictionary = fileHandler.ReadIpConfigFile("ips.cfg");
 }
+catch (Exception) { Environment.Exit(1); }
 #endregion
 
 #region Config

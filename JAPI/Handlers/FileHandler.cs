@@ -9,10 +9,6 @@ public class FileHandler
     private FileHandler() { }
 
     public static FileHandler GetFileHandler() { return Instance; }
-
-    //Me and hayden will both be implemetning in this file. So here are some lines to stop merge conflicts
-
-    //***********Talon Code*****
     /// <summary>
     /// This method reads from the given file to read in all IP Addresses and Service IDs, puts them in a sictionary and returns them.
     /// </summary>
@@ -36,13 +32,11 @@ public class FileHandler
                 }
             }
         }
-        catch (FileNotFoundException) { Console.WriteLine($"Could not find the following file attempting to be opened: {fileName}"); serviceDictionary.Clear(); }
-        catch (IOException) { Console.WriteLine($"There was an error trying to perform IO operations on the following file: {fileName}"); serviceDictionary.Clear(); }
-        catch (Exception) { Console.WriteLine("Something has went wrong with the ReadIpConfigFile method in FileHandler."); serviceDictionary.Clear(); }
+        catch (FileNotFoundException) { throw new FileNotFoundException($"Could not find the following file attempting to be opened: {fileName}"); }
+        catch (IOException) { throw new IOException($"There was an error trying to perform IO operations on the following file: {fileName}"); }
+        catch (Exception) { throw; }
         return serviceDictionary;
     }
-    //**************************
-
     //***********Hayden Code*****
 
     //**************************
