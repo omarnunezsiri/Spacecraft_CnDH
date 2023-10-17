@@ -1,5 +1,8 @@
 // The Spacecraft C&DH Team licenses this file to you under the MIT license.
 
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 namespace JAPI.Handlers;
 
 public class FileHandler
@@ -37,7 +40,22 @@ public class FileHandler
         catch (Exception) { throw; }
         return serviceDictionary;
     }
-    //***********Hayden Code***** my code - pre-commit validation
 
-    //**************************
+    /// <summary>
+    /// This method reads the telemetry data and position
+    /// </summary>
+    /// <param name="fileName">File to read from</param>
+    public void ReadTelemtryData(string filename)
+    {
+        if (File.Exists(filename))
+        {
+            try
+            {
+                string jsonData = File.ReadAllText(filename);
+                Telemetry telemetryData = JsonSerializer.Deserialize<Telemetry>(jsonData);
+            }
+            catch (JsonException ex) { Console.WriteLine("Error deserializing JSON: " + ex.Message); }
+        }
+        else { Console.WriteLine("JSON file not found"); }
+    }
 }
