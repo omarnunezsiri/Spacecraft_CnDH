@@ -44,18 +44,21 @@ public class FileHandler
     /// This method reads and deserializes the Telemetry data from a JSON file
     /// </summary>
     /// <param name="fileName">File to read from</param>
-    public void ReadTelemtryData(string fileName)
+    public Telemetry ReadTelemtryData(string fileName)
     {
+        Telemetry telemetryData = new Telemetry();
         if (File.Exists(fileName))
         {
             try
             {
                 string jsonData = File.ReadAllText(fileName);
-                Telemetry telemetryData = JsonSerializer.Deserialize<Telemetry>(jsonData);
+                telemetryData = JsonSerializer.Deserialize<Telemetry>(jsonData);
             }
             catch (JsonException ex) { Console.WriteLine("Error deserializing JSON: " + ex.Message); }
         }
         else { Console.WriteLine("JSON file not found"); }
+
+        return telemetryData;
     }
 
     /// <summary>
@@ -73,6 +76,4 @@ public class FileHandler
         catch (JsonException) { throw new JsonException($"There was an error trying to serialize the telemetry data to JSON"); }
         catch (Exception) { throw; }
     }
-
-    //Hayden's Code
 }
