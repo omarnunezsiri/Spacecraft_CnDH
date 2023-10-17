@@ -6,9 +6,12 @@ using Microsoft.AspNetCore.Mvc;
 #region Setup
 //This is where any setup code will go.
 FileHandler fileHandler = FileHandler.GetFileHandler();
-//TODO: Implement this ReadfIpConfigFile method
-fileHandler.ReadIpConfigFile("ips.cfg");
-
+Dictionary<int, string> serviceDictionary = new Dictionary<int, string>();
+try
+{
+    serviceDictionary = fileHandler.ReadIpConfigFile("ips.cfg");
+}
+catch (Exception) { Environment.Exit(1); }
 #endregion
 
 #region Config
