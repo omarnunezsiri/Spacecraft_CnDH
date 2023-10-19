@@ -9,6 +9,29 @@ public class JAPITests
     *  Test cases for the J API
     */
 
+    private TestServer? _testServer;
+    private HttpClient? _testClient;
+
+    [TestInitialize]
+    public void TestInitialize()
+    {
+        _testServer = new TestServer(new WebHostBuilder()
+            .UseStartup<Startup>());
+        _testClient = _testServer.CreateClient();
+    }
+
+    [TestMethod]
+    public async Task JAPI001_GetResource_NotFound_Returns404()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            var response = await _testClient.GetAsync("/pong").ConfigureAwait(true);
+
+            // Arrange
+            Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode, "Error code received is not expected 404");
+        }
+    }
 }
 
 [TestClass]

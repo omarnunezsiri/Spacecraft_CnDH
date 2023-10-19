@@ -5,21 +5,32 @@ on: [push, pull_request]
 jobs:
   build:
 
-    runs-on: ${{matrix.os}}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        dotnet-version: [ '6.0.x', '7.0.x' ]
+        dotnet-version: ['6.0.x', '7.0.x']
 
     steps:
-        - uses: actions/checkout@v4
-        - name: Setup dotnet
-          uses: actions/setup-dotnet@v3
-          with:
-            dotnet-version: ${{ matrix.dotnet-version }}
-        - name: Install dependencies
-          run: dotnet restore
-        - name: Build
-          run: dotnet build
-        - name: Test with the dotnet CLI
-          run: dotnet test
+      - uses: actions/checkout@v4
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Install dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build
+      - name: Test with the dotnet CLI
+        run: |
+          for csproj in $(find . -name '*.csproj'); do
+            echo "Running tests in project: $csproj"
+            dotnet test "$csproj"
+
+            rc=$?
+
+            if [[ $rc != 0 ]]; then
+              echo "Tests in project $csproj failed! Exiting..."
+              exit $rc
+            fi
+          done
