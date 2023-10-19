@@ -1,91 +1,39 @@
 // The Spacecraft C&DH Team licenses this file to you under the MIT license.
 
+using JAPI;
 using JAPI.Handlers;
-using Microsoft.AspNetCore.Mvc;
 
-#region Setup
-//This is where any setup code will go.
-FileHandler fileHandler = FileHandler.GetFileHandler();
+#region Init/Setup
+FileHandler fileHandler = FileHandler.GetFileHandler(); // retrieve file handler singleton instance
 Dictionary<int, string> serviceDictionary = new Dictionary<int, string>();
 try
 {
-    serviceDictionary = fileHandler.ReadIpConfigFile("ips.cfg");
+    serviceDictionary = fileHandler.ReadIpConfigFile("ips.cfg"); // read the service key-value pairs
 }
-catch (Exception) { Environment.Exit(1); }
-#endregion
-
-#region Config
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+catch (Exception e)
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    /* Display error message */
+    Console.ForegroundColor = ConsoleColor.Red;
+    Console.WriteLine($"Exception caught: {e.Message}\nExiting...");
+    Console.ForegroundColor = ConsoleColor.White;
+
+    /* Exit app (failure) */
+    Environment.Exit(1);
 }
 #endregion
 
-#region Endpoints
-# if DEBUG
-// test route
-app.MapGet("/", (HttpContext ctx) =>
-{
-    /* Configure the response */
-    ctx.Response.StatusCode = StatusCodes.Status200OK;
+Console.ForegroundColor = ConsoleColor.Green;
+Console.WriteLine("Service IpConfigFile reading completed without any errors.");
+Console.ForegroundColor = ConsoleColor.White;
 
-    /* Payload */
-    TelemetryHandler telemetryHandler = new TelemetryHandler();
-
-    object telemetry = telemetryHandler.GetTelemetry();
-
-    return telemetry;
-})
-.WithName("Root")
-.WithOpenApi();
-#endif
-
-// Telemetry Request
-app.MapGet("/telemetry", ([FromQuery(Name = "ID")] int source, HttpContext ctx) =>
-{
-    /* Configure the response */
-    ctx.Response.StatusCode = StatusCodes.Status501NotImplemented;
-})
-.WithName("telemetry")
-.WithOpenApi();
-
-// Point command
-app.MapPut("/route", ([FromQuery(Name = "ID")] int source, HttpContext ctx) =>
-{
-    /* Configure the response */
-    ctx.Response.StatusCode = StatusCodes.Status501NotImplemented;
-})
-.WithName("route")
-.WithOpenApi();
-
-// Download image route
-app.MapPost("/downloadImage", (HttpContext ctx) =>
-{
-    /* Configure the response */
-    ctx.Response.StatusCode = StatusCodes.Status501NotImplemented;
-})
-.WithName("Download Image")
-.WithOpenApi();
-
-// Payload On Off
-app.MapPut("/payloadState", ([FromQuery(Name = "ID")] int source, [FromQuery(Name = "state")] bool state, HttpContext ctx) =>
-{
-    /* Configure the response */
-    ctx.Response.StatusCode = StatusCodes.Status501NotImplemented;
-})
-.WithName("Payload Power")
-.WithOpenApi();
-
-#endregion
-
+var app = CreateHostBuilder(args).Build();
 app.Run();
+
+#region Helpers
+static IHostBuilder CreateHostBuilder(string[] args) =>
+     Host.CreateDefaultBuilder(args)
+         .ConfigureWebHostDefaults(webBuilder =>
+         {
+             webBuilder.UseStartup<Startup>();
+         });
+#endregion

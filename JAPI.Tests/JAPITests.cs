@@ -9,8 +9,6 @@ public class JAPITests
     *  Test cases for the J API
     */
 
-    [TestMethod]
-
 }
 
 [TestClass]
