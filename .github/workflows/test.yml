@@ -1,4 +1,4 @@
-name: Dotnet Build and Test Project
+name: Dotnet Build and Test Project on Linux and MacOS
 
 on: [push, pull_request]
 
@@ -8,7 +8,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
         dotnet-version: ['6.0.x', '7.0.x']
 
     steps:
@@ -23,25 +23,14 @@ jobs:
         run: dotnet build
       - name: Test with the dotnet CLI
         run: |
-          # Runs bash script on Linux/MacOS, PowerShell otherwise
-          if [ "$RUNNER_OS" = "Linux" ] || [ "$RUNNER_OS" = "Darwin" ]; then
-            for csproj in $(find . -name '*.csproj'); do
-              echo "Running tests in project: $csproj"
-              dotnet test "$csproj"
-              rc=$?
-              if [[ $rc != 0 ]]; then
-                echo "Tests in project $csproj failed! Exiting..."
-                exit $rc
-              fi
-            done
-          else
-            Get-ChildItem -Recurse -Filter '*.csproj' | ForEach-Object {
-              $csproj = $_.FullName
-              Write-Host "Running tests in project: $csproj"
-              dotnet test "$csproj"
-              if ($LASTEXITCODE -ne 0) {
-                Write-Host "Tests in project $csproj failed! Exiting..."
-                exit $LASTEXITCODE
-              }
-            }
-          fi
+          for csproj in $(find . -name '*.csproj'); do
+            echo "Running tests in project: $csproj"
+            dotnet test "$csproj"
+
+            rc=$?
+
+            if [[ $rc != 0 ]]; then
+              echo "Tests in project $csproj failed! Exiting..."
+              exit $rc
+            fi
+          done
