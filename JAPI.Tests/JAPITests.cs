@@ -47,14 +47,11 @@ public class FileIOTests
     [TestInitialize]
     public void TestInitialize()
     {
-        // Calculate the relative path to go up two directories
-        string relativePath = "..\\..\\..\\assets";
+        string assetsPath = Path.Combine("..", "..", "..", "assets");
+        string absolutePathToAssets = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, assetsPath);
 
-        // Combine the relative path with the test assembly's location
-        string pathToWorkingDirectory = System.IO.Path.GetFullPath(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, relativePath));
-
-        // Set the current working directory to the calculated path
-        Environment.CurrentDirectory = pathToWorkingDirectory;
+        // Set the current working directory to the specified absolute path
+        Environment.CurrentDirectory = absolutePathToAssets;
 
         _ipCfgFile = "ips.cfg"; /* Used to test the ReadIpConfigFile method */
         _wrongIpFormatFile = "wrongIps.cfg"; /* Used to test wrong format */
