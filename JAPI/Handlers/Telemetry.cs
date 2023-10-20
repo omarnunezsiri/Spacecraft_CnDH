@@ -1,4 +1,5 @@
 // The Spacecraft C&DH Team licenses this file to you under the MIT license.
+
 namespace JAPI.Handlers;
 #region All Classes
 #region Coordinate Class
@@ -23,6 +24,25 @@ public class Coordinate
         y = Y;
         z = Z;
     }
+
+    public override bool Equals(object? obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            Coordinate c = (Coordinate)obj;
+            return (x == c.x) && (y == c.y) && (z == c.z);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        throw new NotImplementedException();
+    }
 }
 #endregion
 #region Rotation Class
@@ -46,6 +66,24 @@ public class Rotation
         p = P;
         y = Y;
         r = R;
+    }
+    public override bool Equals(object? obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            Rotation rotation = (Rotation)obj;
+            return (p == rotation.p) && (y == rotation.y) && (r == rotation.r);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        throw new NotImplementedException();
     }
 }
 #endregion
@@ -75,6 +113,25 @@ public class Status
         this.chargeStatus = chargeStatus;
         this.voltage = voltage;
     }
+    public override bool Equals(object? obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            Status status = (Status)obj;
+            return (payloadPower == status.payloadPower) && (dataWaiting == status.dataWaiting) &&
+                (chargeStatus == status.chargeStatus) && (voltage == status.voltage);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        throw new NotImplementedException();
+    }
 }
 #endregion
 #region Telemetry Class
@@ -83,13 +140,30 @@ public class Status
 /// </summary>
 public class Telemetry
 {
-    public int Sample { get; set; }
     public Coordinate? coordinate { get; set; }
     public Rotation? rotation { get; set; }
     public float fuel { get; set; }
     public float temp { get; set; }
     public Status? status { get; set; }
-    public static Telemetry Instance { get; } = new Telemetry();
+    public override bool Equals(object? obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            Telemetry telemetry = (Telemetry)obj;
+            return (coordinate.Equals(telemetry.coordinate)) && (rotation.Equals(telemetry.rotation))
+                && (fuel.Equals(telemetry.fuel)) && (temp.Equals(telemetry.temp)) && (status.Equals(telemetry.status));
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        throw new NotImplementedException();
+    }
 }
 #endregion
 #endregion

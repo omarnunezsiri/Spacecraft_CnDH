@@ -1,5 +1,7 @@
 // The Spacecraft C&DH Team licenses this file to you under the MIT license.
 
+using System.Text.Json;
+
 namespace JAPI.Tests;
 
 [TestClass]
@@ -116,5 +118,64 @@ public class FileIOTests
                 fileHandler.ReadIpConfigFile(_wrongIpFormatFile); // Call the method that should throw the exception
             }
         });
+    }
+
+    [TestMethod]
+    public void FILE005_ReadTelemetryData_ValidFile_ReturnsTelemetryData()
+    {
+        //Arrange
+        FileHandler fileHandler = FileHandler.GetFileHandler();
+
+        string fileName = "testfile.json";
+        Telemetry expectedTelemetryData = new Telemetry
+        {
+            coordinate = new Coordinate(2, 3, 4),
+            rotation = new Rotation(5, 6, 7),
+            fuel = 0.75f,
+            temp = 28.0f,
+            status = new Status(true, true, false, 69.0f)
+        };
+
+        //Create a test file with known JSON data
+        string jsonData = JsonSerializer.Serialize(expectedTelemetryData);
+        File.WriteAllText(fileName, jsonData);
+
+        //Act
+        Telemetry actualTelemetryData = fileHandler.ReadTelemtryData(fileName);
+
+        //Assert
+        if (actualTelemetryData != null)
+        {
+            Assert.AreEqual(expectedTelemetryData, actualTelemetryData);
+        }
+
+    }
+
+    [TestMethod]
+    public void FILE006_WriteTelemetryData_ValidData_WritesToFile()
+    {
+        //Arranage
+        FileHandler fileHandler = FileHandler.GetFileHandler();
+
+        string fileName = "testfile.json";
+        Telemetry telemetryData = new Telemetry
+        {
+            coordinate = new Coordinate(2, 3, 4),
+            rotation = new Rotation(5, 6, 7),
+            fuel = 0.75f,
+            temp = 28.0f,
+            status = new Status(true, true, false, 69.0f)
+        };
+
+        //Act
+        fileHandler.WriteTelemetryData(fileName, telemetryData);
+
+        //Assert
+        string jsonData = File.ReadAllText(fileName);
+        Telemetry? deserializedData = JsonSerializer.Deserialize<Telemetry>(jsonData);
+        if (deserializedData != null)
+        {
+            Assert.AreEqual(telemetryData, deserializedData);
+        }
     }
 }
