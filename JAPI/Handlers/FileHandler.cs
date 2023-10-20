@@ -11,6 +11,7 @@ public class FileHandler
     private FileHandler() { }
 
     public static FileHandler GetFileHandler() { return Instance; }
+
     /// <summary>
     /// This method reads from the given file to read in all IP Addresses and Service IDs, puts them in a sictionary and returns them.
     /// </summary>
