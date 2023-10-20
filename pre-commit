@@ -1,0 +1,51 @@
+#!/bin/sh
+
+# Reset
+Color_Off='\033[0m'       # Text Reset
+
+# Regular Colors
+Cyan='\033[0;36m'         # Cyan
+Red='\033[0;31m'          # Red
+Yellow='\033[0;33m'       # Yellow
+Green='\033[0;32m'        # Green
+
+echo -e "${Cyan}Building the project...${Color_Off}"
+
+# Build the root project
+dotnet clean; dotnet build
+rc=$?
+
+if [[ $rc != 0 ]] ; then
+    echo -e "${Red}Build failed! Exiting...${Color_Off}"
+    exit $rc
+fi
+
+echo -e "${Cyan}Running the test suite...${Color_Off}"
+
+# Find and run tests for all projects in the "Tests" directory
+for csproj in $(find . -name '*.csproj'); do
+    echo -e "${Cyan}Running tests in project: $csproj${Color_Off}"
+    dotnet test "$csproj"
+
+    rc=$?
+
+    if [[ $rc != 0 ]]; then
+        echo -e "${Red}Tests in project $csproj failed! Exiting...${Color_Off}"
+        exit $rc
+    fi
+
+    # Verify code formatting for each project
+    echo -e "${Cyan}Verifying format for project: $csproj${Color_Off}"
+    dotnet format "$csproj" --verify-no-changes
+
+    rc=$?
+
+    if [[ $rc != 0 ]]; then
+        echo -e "${Yellow}Code is not formatted correctly in project $csproj! Formatting${Color_Off}"
+        dotnet format "$csproj" -v diag
+        git add .
+    fi
+done
+
+echo -e "${Green}Success! Exiting...${Color_Off}"
+exit 0
