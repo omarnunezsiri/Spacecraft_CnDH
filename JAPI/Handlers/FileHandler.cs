@@ -6,7 +6,7 @@ namespace JAPI.Handlers;
 
 public class FileHandler
 {
-    static readonly FileHandler Instance = new FileHandler();
+    static readonly FileHandler Instance = new();
 
     private FileHandler() { }
 
@@ -26,7 +26,7 @@ public class FileHandler
                 while (!sr.EndOfStream)
                 {
                     string? line = sr.ReadLine();
-                    if (!String.IsNullOrEmpty(line))
+                    if (!string.IsNullOrEmpty(line))
                     {
                         line.Trim();
                         string[] serviceInformation = line.Split(',');
@@ -45,15 +45,15 @@ public class FileHandler
     /// This method reads and deserializes the Telemetry data from a JSON file
     /// </summary>
     /// <param name="fileName">File to read from</param>
-    public Telemetry ReadTelemtryData(string fileName)
+    public Telemetry? ReadTelemetryData(string fileName)
     {
-        Telemetry telemetryData = new Telemetry();
+        Telemetry? telemetryData = new Telemetry();
         if (File.Exists(fileName))
         {
             try
             {
                 string jsonData = File.ReadAllText(fileName);
-                telemetryData = JsonSerializer.Deserialize<Telemetry>(jsonData);
+                telemetryData = JsonSerializer.Deserialize<Telemetry?>(jsonData);
             }
             catch (JsonException ex) { Console.WriteLine("Error deserializing JSON: " + ex.Message); }
         }
@@ -70,7 +70,7 @@ public class FileHandler
     {
         try
         {
-            string jsonData = JsonSerializer.Serialize<Telemetry>(telemetryData);
+            string jsonData = JsonSerializer.Serialize(telemetryData);
             File.WriteAllText(fileName, jsonData);
         }
         catch (IOException) { throw new IOException($"There was an error trying to perform IO operations on the following file: {fileName}"); }

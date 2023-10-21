@@ -141,7 +141,7 @@ public class FileIOTests
         File.WriteAllText(fileName, jsonData);
 
         //Act
-        Telemetry actualTelemetryData = fileHandler.ReadTelemtryData(fileName);
+        Telemetry? actualTelemetryData = fileHandler.ReadTelemetryData(fileName);
 
         //Assert
         if (actualTelemetryData != null)
@@ -172,7 +172,7 @@ public class FileIOTests
 
         //Assert
         string jsonData = File.ReadAllText(fileName);
-        Telemetry? deserializedData = JsonSerializer.Deserialize<Telemetry>(jsonData);
+        Telemetry? deserializedData = JsonSerializer.Deserialize<Telemetry?>(jsonData);
         if (deserializedData != null)
         {
             Assert.AreEqual(telemetryData, deserializedData);
