@@ -34,6 +34,7 @@ static IHostBuilder CreateHostBuilder(string[] args) =>
      Host.CreateDefaultBuilder(args)
          .ConfigureWebHostDefaults(webBuilder =>
          {
-             webBuilder.UseStartup<Startup>();
+             webBuilder.UseStartup<Startup>()
+                       .UseUrls("http://*:8080"); // listen on all interfaces on port 8080
          });
 #endregion
