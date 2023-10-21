@@ -9,6 +9,8 @@
 *.user
 *.userosscache
 *.sln.docstates
+japiPublish.*
+[Jj]API/ips.cfg
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
