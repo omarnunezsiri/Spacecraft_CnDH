@@ -148,7 +148,7 @@ public class Telemetry
     public override bool Equals(object? obj)
     {
         //Check for null and compare run-time types.
-        if ((obj == null) || !GetType().Equals(obj.GetType()))
+        if ((obj == null) || !GetType().Equals(obj.GetType()) || this.coordinate == null || this.rotation == null || this.status == null)
         {
             return false;
         }
@@ -167,7 +167,7 @@ public class Telemetry
 
     public bool UpdateShipDirection(float xCoord, float yCoord, float zCoord, float pitch, float yaw, float roll)
     {
-        if (this == null) { return false; }
+        if (this == null || this.coordinate == null || this.rotation == null) { return false; }
         this.coordinate.x = xCoord;
         this.coordinate.y = yCoord;
         this.coordinate.z = zCoord;
