@@ -164,6 +164,20 @@ public class Telemetry
     {
         throw new NotImplementedException();
     }
+
+    public bool UpdateShipDirection(float xCoord, float yCoord, float zCoord, float pitch, float yaw, float roll)
+    {
+        if (this == null) { return false; }
+        this.coordinate.x = xCoord;
+        this.coordinate.y = yCoord;
+        this.coordinate.z = zCoord;
+
+        this.rotation.p = pitch;
+        this.rotation.y = yaw;
+        this.rotation.r = roll;
+
+        return true;
+    }
 }
 #endregion
 #endregion
