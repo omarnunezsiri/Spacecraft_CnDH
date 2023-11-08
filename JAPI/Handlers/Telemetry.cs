@@ -148,7 +148,7 @@ public class Telemetry
     public override bool Equals(object? obj)
     {
         //Check for null and compare run-time types.
-        if ((obj == null) || !GetType().Equals(obj.GetType()))
+        if ((obj == null) || !GetType().Equals(obj.GetType()) || this.coordinate == null || this.rotation == null || this.status == null)
         {
             return false;
         }
@@ -163,6 +163,20 @@ public class Telemetry
     public override int GetHashCode()
     {
         throw new NotImplementedException();
+    }
+
+    public bool UpdateShipDirection(float xCoord, float yCoord, float zCoord, float pitch, float yaw, float roll)
+    {
+        if (this == null || this.coordinate == null || this.rotation == null) { return false; }
+        this.coordinate.x = xCoord;
+        this.coordinate.y = yCoord;
+        this.coordinate.z = zCoord;
+
+        this.rotation.p = pitch;
+        this.rotation.y = yaw;
+        this.rotation.r = roll;
+
+        return true;
     }
 }
 #endregion

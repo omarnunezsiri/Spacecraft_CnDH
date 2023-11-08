@@ -179,3 +179,86 @@ public class FileIOTests
         }
     }
 }
+[TestClass]
+public class DataTests
+{
+
+    Telemetry telemetryData;
+
+    public void Setup(Coordinate? coord, Rotation? rot, float fuel, float temp, Status status)
+    {
+        telemetryData = new Telemetry();
+        telemetryData.coordinate = coord;
+        telemetryData.rotation = rot;
+        telemetryData.fuel = fuel;
+        telemetryData.temp = temp;
+        telemetryData.status = status;
+    }
+
+    [TestMethod]
+    public void DATA001_NullCoordinateClass_FalseIsReturned()
+    {
+        //Arrange
+        bool result, expectedResult = false;
+        Setup(null, new Rotation(2, 3, 4), 50, 32, new Status(true, true, true, 50));
+        //Act
+        result = telemetryData.UpdateShipDirection(1, 2, 3, 4, 5, 6);
+
+        //Assert
+        Assert.AreEqual(expectedResult, result);
+    }
+
+    [TestMethod]
+    public void DATA002_NullRotationClass_FalseIsReturned()
+    {
+        //Arrange
+        bool result, expectedResult = false;
+        Setup(new Coordinate(1, 2, 3), null, 50, 32, new Status(true, true, true, 50));
+        //Act
+        result = telemetryData.UpdateShipDirection(1, 2, 3, 4, 5, 6);
+
+        //Assert
+        Assert.AreEqual(expectedResult, result);
+    }
+
+    [TestMethod]
+    public void DATA003_ValidInput_TrueIsReturned()
+    {
+        //Arrange
+        bool result, expectedResult = true;
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 50, 32, new Status(true, true, true, 50));
+        //Act
+        result = telemetryData.UpdateShipDirection(7, 8, 9, 10, 11, 12);
+
+        //Assert
+        Assert.AreEqual(expectedResult, result);
+    }
+
+    [TestMethod]
+    public void DATA004_ValidInput_CoordinatesAreUpdated()
+    {
+        //Arrange
+        Coordinate expectedResult = new Coordinate(7, 8, 9);
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 50, 32, new Status(true, true, true, 50));
+
+        //Act
+        telemetryData.UpdateShipDirection(7, 8, 9, 10, 11, 12);
+
+        //Assert
+        Assert.AreEqual(expectedResult, telemetryData.coordinate);
+    }
+
+    [TestMethod]
+    public void DATA005_ValidInput_RotationIsUpdated()
+    {
+        //Arrange
+        Rotation expectedResult = new Rotation(10, 11, 12);
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 50, 32, new Status(true, true, true, 50));
+
+        //Act
+        telemetryData.UpdateShipDirection(7, 8, 9, 10, 11, 12);
+
+        //Assert
+        Assert.AreEqual(expectedResult, telemetryData.rotation);
+    }
+}
