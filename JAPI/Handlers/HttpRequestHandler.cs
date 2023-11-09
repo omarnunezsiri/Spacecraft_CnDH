@@ -13,17 +13,28 @@ public class HttpRequestHandler : Controller
         _httpClient = httpClient;
     }
 
+    // All the ID's and IP addresses of the various services
     private Dictionary<int, string> UriValues;
 
+    /// <summary>
+    /// Setting the Uri values
+    /// </summary>
+    /// <param name="input"></param>
     public void SetUriValues(Dictionary<int, string> input)
     {
         UriValues = input;
     }
 
+    // Id of the space uplink/downlink
     private const int SpaceUpDown = 3;
 
     #region HttpRequests
-    public async Task SendRawData(HttpContent ctx)
+    /// <summary>
+    /// function for sending rawData recieved to uplink/downlink
+    /// </summary>
+    /// <param name="ctx"></param>
+    /// <returns></returns>
+    public async Task<HttpResponseMessage> SendRawData(HttpContent ctx)
     {
         // Uri
         string apiUrl = UriValues[SpaceUpDown];
@@ -34,7 +45,7 @@ public class HttpRequestHandler : Controller
         response.StatusCode = HttpStatusCode.OK;
         response.Content = new StringContent("No Content");
 #else
-        HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, ctx);
+        HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, ctx).ConfigureAwait(true);
 #endif
         if (response.IsSuccessStatusCode)
         {
@@ -45,7 +56,7 @@ public class HttpRequestHandler : Controller
         {
             Console.WriteLine($"API Request failed with status code: {response.StatusCode}");
         }
-
+        return response;
     }
     #endregion
 }

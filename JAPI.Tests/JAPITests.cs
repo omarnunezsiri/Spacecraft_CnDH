@@ -1,6 +1,7 @@
 // The Spacecraft C&DH Team licenses this file to you under the MIT license.
 
-using System.Text.Json;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace JAPI.Tests;
 
@@ -13,6 +14,7 @@ public class JAPITests
 
     private TestServer? _testServer;
     private HttpClient? _testClient;
+    private HttpRequestHandler? _httpRequestHandler;
 
     [TestInitialize]
     public void TestInitialize()
@@ -20,6 +22,11 @@ public class JAPITests
         _testServer = new TestServer(new WebHostBuilder()
             .UseStartup<Startup>());
         _testClient = _testServer.CreateClient();
+        _httpRequestHandler = new HttpRequestHandler(_testClient);
+        Dictionary<int, string> temp = new Dictionary<int, string>();
+        temp.Add(3, "xxx.xxx.xxx.x");
+        _httpRequestHandler.SetUriValues(temp);
+        Startup.SendHandler = _httpRequestHandler;
     }
 
     [TestMethod]
@@ -32,6 +39,32 @@ public class JAPITests
 
             // Arrange
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode, "Error code received is not expected 404");
+        }
+    }
+
+    [TestMethod]
+    public async Task JAPI002_downloadImage_NoContent_Returns204()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            var requestData = new TestPacketData
+            {
+                verb = "POST",
+                uri = "xxx.xxx.xxx.x",
+                data = new TestRawData
+                {
+                    raw = "0x12382181828122",
+                    sequence = 1
+                }
+
+            };
+            string jsonBody = JsonConvert.SerializeObject(requestData);
+            HttpContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+            var response = await _testClient.PostAsync("/downloadImage", content).ConfigureAwait(true);
+
+            // Arrange
+            Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode, "Error code received is not expected 204");
         }
     }
 }
@@ -137,7 +170,7 @@ public class FileIOTests
         };
 
         //Create a test file with known JSON data
-        string jsonData = JsonSerializer.Serialize(expectedTelemetryData);
+        string jsonData = System.Text.Json.JsonSerializer.Serialize(expectedTelemetryData);
         File.WriteAllText(fileName, jsonData);
 
         //Act
@@ -172,7 +205,7 @@ public class FileIOTests
 
         //Assert
         string jsonData = File.ReadAllText(fileName);
-        Telemetry? deserializedData = JsonSerializer.Deserialize<Telemetry?>(jsonData);
+        Telemetry? deserializedData = System.Text.Json.JsonSerializer.Deserialize<Telemetry?>(jsonData);
         if (deserializedData != null)
         {
             Assert.AreEqual(telemetryData, deserializedData);
@@ -261,4 +294,57 @@ public class DataTests
         //Assert
         Assert.AreEqual(expectedResult, telemetryData.rotation);
     }
+}
+
+[TestClass]
+public class HttpRequestTests
+{
+    /*
+     * Test cases for the HttpRequestHandler
+     */
+
+    private TestServer? _testServer;
+    private HttpClient? _testClient;
+    private HttpRequestHandler _httpRequestHandler;
+
+    [TestInitialize]
+    public void TestInitialize()
+    {
+        _testServer = new TestServer(new WebHostBuilder()
+            .UseStartup<Startup>());
+        _testClient = _testServer.CreateClient();
+        _httpRequestHandler = new HttpRequestHandler(_testClient);
+        Dictionary<int, string> temp = new Dictionary<int, string>();
+        temp.Add(3, "xxx.xxx.xxx.x");
+        _httpRequestHandler.SetUriValues(temp);
+    }
+    [TestMethod]
+    public async Task HttpRequestHandler001_SendRawData_NoContent_ReturnsCode()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            StringContent content = null;
+            HttpResponseMessage response = await _httpRequestHandler.SendRawData(content).ConfigureAwait(true);
+
+            // Arrange
+#if DEBUG
+            Assert.IsTrue(response.IsSuccessStatusCode);
+#else
+            Assert.IsFalse(response.IsSuccessStatusCode);
+#endif
+        }
+    }
+}
+
+public class TestPacketData
+{
+    public string verb;
+    public string uri;
+    public TestRawData data;
+}
+public class TestRawData
+{
+    public string raw;
+    public int sequence;
 }

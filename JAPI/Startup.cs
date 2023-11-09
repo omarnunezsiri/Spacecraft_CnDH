@@ -53,7 +53,7 @@ public class Startup
             .WithOpenApi();
 
             // Download image route
-            endpoints.MapPost("/downloadImage", (HttpContext ctx) =>
+            endpoints.MapPost("/downloadImage", async (HttpContext ctx) =>
             {
                 /* Configure the response */
                 ctx.Response.StatusCode = StatusCodes.Status204NoContent;
@@ -69,7 +69,7 @@ public class Startup
 
                     // Create an HttpContent from the request body
                     var requestContent = new StringContent(requestBody.Result, Encoding.UTF8, "application/json");
-                    SendHandler.SendRawData(requestContent);
+                    await SendHandler.SendRawData(requestContent).ConfigureAwait(true);
                 }
 
             })
