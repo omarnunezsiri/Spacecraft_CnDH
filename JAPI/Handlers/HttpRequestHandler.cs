@@ -79,14 +79,31 @@ public class HttpRequestHandler : Controller
 #else
         HttpResponseMessage response = await _httpClient.PutAsync(apiUrl, null).ConfigureAwait(true);
 #endif
+
+        TelemetryHandler telem = TelemetryHandler.Instance();
+
         // recieve response
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             Console.WriteLine($"API Response: {responseContent}");
+            telem.GetTelemetry().status.payloadPower = state;
         }
         else
         {
+            switch (response.StatusCode)
+            {
+                case HttpStatusCode.MethodNotAllowed:
+                    Console.WriteLine("Payload already in state\n");
+                    telem.GetTelemetry().status.payloadPower = state;
+                    break;
+                case HttpStatusCode.BadRequest:
+                    Console.WriteLine("Payload responded Bad Request Not updating telemtry\n");
+                    break;
+                default:
+                    Console.WriteLine("Unknown Error\n");
+                    break;
+            }
             Console.WriteLine($"API Request failed with status code: {response.StatusCode}");
         }
         return response;

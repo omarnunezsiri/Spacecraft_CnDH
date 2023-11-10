@@ -125,14 +125,20 @@ public class Startup
             endpoints.MapPut("/payloadState", ([FromQuery(Name = "ID")] int source, [FromQuery(Name = "state")] bool state, HttpContext ctx) =>
             {
                 Dictionary<int, string> validUris = SendHandler.GetUriValues();
+                // check that id is in dictionary
                 if (!validUris.ContainsKey(source))
                 {
                     ctx.Response.StatusCode = StatusCodes.Status400BadRequest;
                     return;
                 }
 
-                // NEED TO CHECK STATUS HERE
-
+                //Check payload status
+                TelemetryHandler handler = TelemetryHandler.Instance();
+                if (handler.GetTelemetry().status.payloadPower == state)
+                {
+                    ctx.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
+                    return;
+                }
                 /* Configure the response */
                 ctx.Response.StatusCode = StatusCodes.Status200OK;
                 ctx.Response.CompleteAsync();

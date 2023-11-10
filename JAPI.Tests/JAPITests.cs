@@ -27,6 +27,7 @@ public class JAPITests
         temp.Add(3, "xxx.xxx.xxx.x");
         _httpRequestHandler.SetUriValues(temp);
         Startup.SendHandler = _httpRequestHandler;
+        TelemetryHandler.Instance().GetTelemetry().status.payloadPower = false;
     }
 
     [TestMethod]
@@ -131,6 +132,42 @@ public class JAPITests
 
             //Arrange
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, "Error code received is not expected 200");
+        }
+    }
+    [TestMethod]
+    public async Task JAPI006_PayloadToggle_OK_Return200()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            var response = await _testClient.PutAsync("/payloadState?ID=3&state=true", null).ConfigureAwait(true);
+
+            // Arrange
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, "Error code received is not expected 200");
+        }
+    }
+    [TestMethod]
+    public async Task JAPI007_Payload_BadRequest_Return400()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            var response = await _testClient.PutAsync("/payloadState?ID=1000&state=true", null).ConfigureAwait(true);
+
+            // Arrange
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode, "Error code received is not expected 400");
+        }
+    }
+    [TestMethod]
+    public async Task JAPI008_Payload_NotAllowed_Return405()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            var response = await _testClient.PutAsync("/payloadState?ID=3&state=false", null).ConfigureAwait(true);
+
+            // Arrange
+            Assert.AreEqual(HttpStatusCode.MethodNotAllowed, response.StatusCode, "Error code received is not expected 405");
         }
     }
 }
@@ -382,6 +419,7 @@ public class HttpRequestTests
         _httpRequestHandler = new HttpRequestHandler(_testClient);
         Dictionary<int, string> temp = new Dictionary<int, string>();
         temp.Add(3, "xxx.xxx.xxx.x");
+        temp.Add(2, "xxx.xxx.xxx.x");
         _httpRequestHandler.SetUriValues(temp);
     }
     [TestMethod]
@@ -400,6 +438,24 @@ public class HttpRequestTests
             Assert.IsFalse(response.IsSuccessStatusCode);
 #endif
         }
+    }
+    [TestMethod]
+    public async Task HttpRequestHandler002_TogglePayload_true_ReturnsCode()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            StringContent content = null;
+            HttpResponseMessage response = await _httpRequestHandler.TogglePayload(true).ConfigureAwait(true);
+
+            // Arrange
+#if DEBUG
+            Assert.IsTrue(response.IsSuccessStatusCode);
+#else
+                Assert.IsFalse(response.IsSuccessStatusCode);
+#endif
+        }
+
     }
 }
 
