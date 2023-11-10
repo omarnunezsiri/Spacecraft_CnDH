@@ -79,8 +79,20 @@ public class Startup
             // Payload On Off
             endpoints.MapPut("/payloadState", ([FromQuery(Name = "ID")] int source, [FromQuery(Name = "state")] bool state, HttpContext ctx) =>
             {
+                Dictionary<int, string> validUris = SendHandler.GetUriValues();
+                if (!validUris.ContainsKey(source))
+                {
+                    ctx.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    return;
+                }
+
+                // NEED TO CHECK STATUS HERE
+
                 /* Configure the response */
-                ctx.Response.StatusCode = StatusCodes.Status501NotImplemented;
+                ctx.Response.StatusCode = StatusCodes.Status200OK;
+                ctx.Response.CompleteAsync();
+                SendHandler.TogglePayload(state);
+
             })
             .WithName("Payload Power")
             .WithOpenApi();
