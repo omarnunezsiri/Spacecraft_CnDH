@@ -38,8 +38,25 @@ public class Startup
             // Telemetry Request
             endpoints.MapGet("/telemetry", ([FromQuery(Name = "ID")] int source, HttpContext ctx) =>
             {
-                /* Configure the response */
-                ctx.Response.StatusCode = StatusCodes.Status501NotImplemented;
+                Telemetry? getTelemetryData = new Telemetry();
+                FileHandler fileHandler = FileHandler.GetFileHandler();
+                getTelemetryData = fileHandler.ReadTelemetryData("TelemetryData.json");
+
+                if (getTelemetryData == null)
+                {
+                    ctx.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                    return;
+                }
+                else
+                {
+                    ctx.Response.StatusCode = StatusCodes.Status200OK;
+                    ctx.Response.CompleteAsync();
+                }
+
+                var sendData = JsonSerializer.Serialize(getTelemetryData);
+                var requestContent = new StringContent(sendData, Encoding.UTF8, "application/json");
+
+                SendHandler.SendPackagedData(requestContent, source);
             })
             .WithName("telemetry")
             .WithOpenApi();
