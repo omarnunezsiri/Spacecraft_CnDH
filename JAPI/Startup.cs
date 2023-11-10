@@ -1,6 +1,7 @@
 // The Spacecraft C&DH Team licenses this file to you under the MIT license.
 
 using System.Text;
+using System.Text.Json;
 using JAPI.Handlers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,12 +45,56 @@ public class Startup
             .WithOpenApi();
 
             // Point command
-            endpoints.MapPut("/route", ([FromQuery(Name = "ID")] int source, HttpContext ctx) =>
+            endpoints.MapPut("/point", async ([FromQuery(Name = "ID")] int source, HttpContext ctx) =>
             {
-                /* Configure the response */
-                ctx.Response.StatusCode = StatusCodes.Status501NotImplemented;
+                //Check if chargin
+                TelemetryHandler handler = TelemetryHandler.Instance();
+                if (handler.GetTelemetry().status.chargeStatus == true)
+                {
+                    ctx.Response.StatusCode = StatusCodes.Status405MethodNotAllowed; //Charging State => Turn off for requests
+                    return;
+                }
+
+                using (StreamReader reader = new StreamReader(ctx.Request.Body, Encoding.UTF8))
+                {
+                    var requestBody = reader.ReadToEndAsync();
+
+                    // Create an HttpContent from the request body
+                    var requestContent = new StringContent(requestBody.Result, Encoding.UTF8, "application/json");
+                    string requestConverted = requestContent.ReadAsStringAsync().Result;
+                    Telemetry payload = JsonSerializer.Deserialize<Telemetry>(requestConverted);
+
+                    //Check if the required parameters are present
+                    if (payload.coordinate == null || payload.rotation == null)
+                    {
+                        ctx.Response.StatusCode = StatusCodes.Status400BadRequest;
+                        return;
+                    }
+
+                    //Retrieve the direction from the payload
+                    float xCoord = payload.coordinate.x;
+                    float yCoord = payload.coordinate.y;
+                    float zCoord = payload.coordinate.z;
+
+                    float pitch = payload.rotation.p;
+                    float yaw = payload.rotation.y;
+                    float roll = payload.rotation.r;
+
+                    if (!handler.GetTelemetry().UpdateShipDirection(xCoord, yCoord, zCoord, pitch, yaw, roll))
+                    {
+                        ctx.Response.StatusCode = StatusCodes.Status501NotImplemented; //Not right status code (Not Tested)
+                        return;
+                    }
+                    else
+                    {
+                        //Everything is good - COPIUM
+                        ctx.Response.StatusCode = StatusCodes.Status200OK;
+                        return;
+                    }
+                }
+
             })
-            .WithName("route")
+            .WithName("point")
             .WithOpenApi();
 
             // Download image route
