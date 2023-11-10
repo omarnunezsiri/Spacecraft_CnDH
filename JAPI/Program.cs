@@ -27,6 +27,11 @@ Console.WriteLine("Service IpConfigFile reading completed without any errors.");
 Console.ForegroundColor = ConsoleColor.White;
 
 var app = CreateHostBuilder(args).Build();
+using (var scope = app.Services.CreateScope())
+{
+    Startup.SendHandler = scope.ServiceProvider.GetService<HttpRequestHandler>();
+    Startup.SendHandler.SetUriValues(serviceDictionary);
+}
 app.Run();
 
 #region Helpers
@@ -34,6 +39,7 @@ static IHostBuilder CreateHostBuilder(string[] args) =>
      Host.CreateDefaultBuilder(args)
          .ConfigureWebHostDefaults(webBuilder =>
          {
-             webBuilder.UseStartup<Startup>();
+             webBuilder.UseStartup<Startup>()
+                .UseUrls("http://*:8080"); // listen on all interfaces on port 8080
          });
 #endregion

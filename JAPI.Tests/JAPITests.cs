@@ -1,6 +1,7 @@
 // The Spacecraft C&DH Team licenses this file to you under the MIT license.
 
-using System.Text.Json;
+using System.Text;
+using Newtonsoft.Json;
 
 namespace JAPI.Tests;
 
@@ -13,6 +14,7 @@ public class JAPITests
 
     private TestServer? _testServer;
     private HttpClient? _testClient;
+    private HttpRequestHandler? _httpRequestHandler;
 
     [TestInitialize]
     public void TestInitialize()
@@ -20,6 +22,12 @@ public class JAPITests
         _testServer = new TestServer(new WebHostBuilder()
             .UseStartup<Startup>());
         _testClient = _testServer.CreateClient();
+        _httpRequestHandler = new HttpRequestHandler(_testClient);
+        Dictionary<int, string> temp = new Dictionary<int, string>();
+        temp.Add(3, "xxx.xxx.xxx.x");
+        _httpRequestHandler.SetUriValues(temp);
+        Startup.SendHandler = _httpRequestHandler;
+        TelemetryHandler.Instance().GetTelemetry().status.payloadPower = false;
     }
 
     [TestMethod]
@@ -32,6 +40,134 @@ public class JAPITests
 
             // Arrange
             Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode, "Error code received is not expected 404");
+        }
+    }
+
+    [TestMethod]
+    public async Task JAPI002_downloadImage_NoContent_Returns204()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            var requestData = new TestPacketData
+            {
+                verb = "POST",
+                uri = "xxx.xxx.xxx.x",
+                data = new TestRawData
+                {
+                    raw = "0x12382181828122",
+                    sequence = 1
+                }
+
+            };
+            string jsonBody = JsonConvert.SerializeObject(requestData);
+            HttpContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+            var response = await _testClient.PostAsync("/downloadImage", content).ConfigureAwait(true);
+
+            // Arrange
+            Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode, "Error code received is not expected 204");
+        }
+    }
+
+    [TestMethod]
+    public async Task JAPI003_PointRoute_MethodNotAllowed_Returns405()
+    {
+        if (_testClient is not null)
+        {
+            //Arrange and Act
+            TelemetryHandler handler = TelemetryHandler.Instance();
+            handler.GetTelemetry().status.chargeStatus = true;
+            var requestData = new Telemetry
+            {
+                coordinate = new Coordinate(1, 2.5f, 3),
+                rotation = new Rotation(0, 0.8f, 1.2f)
+            };
+            string jsonBody = JsonConvert.SerializeObject(requestData);
+            HttpContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+            var response = await _testClient.PutAsync("/point?ID=1", content).ConfigureAwait(true);
+
+            //Arrange
+            Assert.AreEqual(HttpStatusCode.MethodNotAllowed, response.StatusCode, "Error code received is not expected 405");
+        }
+    }
+
+    [TestMethod]
+    public async Task JAPI004_PointRoute_BadRequest_Return400()
+    {
+        if (_testClient is not null)
+        {
+            //Arrange and Act
+            TelemetryHandler handler = TelemetryHandler.Instance();
+            handler.GetTelemetry().status.chargeStatus = false;
+            var requestData = new Telemetry
+            {
+                coordinate = null,
+                rotation = null
+            };
+            string jsonBody = JsonConvert.SerializeObject(requestData);
+            HttpContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+            var response = await _testClient.PutAsync("/point?ID=1", content).ConfigureAwait(true);
+
+            //Arrange
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode, "Error code received is not expected 400");
+        }
+    }
+
+    [TestMethod]
+    public async Task JAPI005_PointRoute_OK_Return200()
+    {
+        if (_testClient is not null)
+        {
+            //Arrange and Act
+            TelemetryHandler handler = TelemetryHandler.Instance();
+            handler.GetTelemetry().status.chargeStatus = false;
+            var requestData = new Telemetry
+            {
+                coordinate = new Coordinate(1, 2.5f, 3),
+                rotation = new Rotation(0, 0.8f, 1.2f)
+            };
+            string jsonBody = JsonConvert.SerializeObject(requestData);
+            HttpContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+            var response = await _testClient.PutAsync("/point?ID=1", content).ConfigureAwait(true);
+
+            //Arrange
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, "Error code received is not expected 200");
+        }
+    }
+    [TestMethod]
+    public async Task JAPI006_PayloadToggle_OK_Return200()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            var response = await _testClient.PutAsync("/payloadState?ID=3&state=true", null).ConfigureAwait(true);
+
+            // Arrange
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, "Error code received is not expected 200");
+        }
+    }
+    [TestMethod]
+    public async Task JAPI007_Payload_BadRequest_Return400()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            var response = await _testClient.PutAsync("/payloadState?ID=1000&state=true", null).ConfigureAwait(true);
+
+            // Arrange
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode, "Error code received is not expected 400");
+        }
+    }
+    [TestMethod]
+    public async Task JAPI008_Payload_NotAllowed_Return405()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            var response = await _testClient.PutAsync("/payloadState?ID=3&state=false", null).ConfigureAwait(true);
+
+            // Arrange
+            Assert.AreEqual(HttpStatusCode.MethodNotAllowed, response.StatusCode, "Error code received is not expected 405");
         }
     }
 }
@@ -137,11 +273,11 @@ public class FileIOTests
         };
 
         //Create a test file with known JSON data
-        string jsonData = JsonSerializer.Serialize(expectedTelemetryData);
+        string jsonData = System.Text.Json.JsonSerializer.Serialize(expectedTelemetryData);
         File.WriteAllText(fileName, jsonData);
 
         //Act
-        Telemetry actualTelemetryData = fileHandler.ReadTelemtryData(fileName);
+        Telemetry? actualTelemetryData = fileHandler.ReadTelemetryData(fileName);
 
         //Assert
         if (actualTelemetryData != null)
@@ -172,10 +308,165 @@ public class FileIOTests
 
         //Assert
         string jsonData = File.ReadAllText(fileName);
-        Telemetry? deserializedData = JsonSerializer.Deserialize<Telemetry>(jsonData);
+        Telemetry? deserializedData = System.Text.Json.JsonSerializer.Deserialize<Telemetry?>(jsonData);
         if (deserializedData != null)
         {
             Assert.AreEqual(telemetryData, deserializedData);
         }
     }
+}
+[TestClass]
+public class DataTests
+{
+
+    Telemetry telemetryData;
+
+    public void Setup(Coordinate? coord, Rotation? rot, float fuel, float temp, Status status)
+    {
+        telemetryData = new Telemetry();
+        telemetryData.coordinate = coord;
+        telemetryData.rotation = rot;
+        telemetryData.fuel = fuel;
+        telemetryData.temp = temp;
+        telemetryData.status = status;
+    }
+
+    [TestMethod]
+    public void DATA001_NullCoordinateClass_FalseIsReturned()
+    {
+        //Arrange
+        bool result, expectedResult = false;
+        Setup(null, new Rotation(2, 3, 4), 50, 32, new Status(true, true, true, 50));
+        //Act
+        result = telemetryData.UpdateShipDirection(1, 2, 3, 4, 5, 6);
+
+        //Assert
+        Assert.AreEqual(expectedResult, result);
+    }
+
+    [TestMethod]
+    public void DATA002_NullRotationClass_FalseIsReturned()
+    {
+        //Arrange
+        bool result, expectedResult = false;
+        Setup(new Coordinate(1, 2, 3), null, 50, 32, new Status(true, true, true, 50));
+        //Act
+        result = telemetryData.UpdateShipDirection(1, 2, 3, 4, 5, 6);
+
+        //Assert
+        Assert.AreEqual(expectedResult, result);
+    }
+
+    [TestMethod]
+    public void DATA003_ValidInput_TrueIsReturned()
+    {
+        //Arrange
+        bool result, expectedResult = true;
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 50, 32, new Status(true, true, true, 50));
+        //Act
+        result = telemetryData.UpdateShipDirection(7, 8, 9, 10, 11, 12);
+
+        //Assert
+        Assert.AreEqual(expectedResult, result);
+    }
+
+    [TestMethod]
+    public void DATA004_ValidInput_CoordinatesAreUpdated()
+    {
+        //Arrange
+        Coordinate expectedResult = new Coordinate(7, 8, 9);
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 50, 32, new Status(true, true, true, 50));
+
+        //Act
+        telemetryData.UpdateShipDirection(7, 8, 9, 10, 11, 12);
+
+        //Assert
+        Assert.AreEqual(expectedResult, telemetryData.coordinate);
+    }
+
+    [TestMethod]
+    public void DATA005_ValidInput_RotationIsUpdated()
+    {
+        //Arrange
+        Rotation expectedResult = new Rotation(10, 11, 12);
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 50, 32, new Status(true, true, true, 50));
+
+        //Act
+        telemetryData.UpdateShipDirection(7, 8, 9, 10, 11, 12);
+
+        //Assert
+        Assert.AreEqual(expectedResult, telemetryData.rotation);
+    }
+}
+
+[TestClass]
+public class HttpRequestTests
+{
+    /*
+     * Test cases for the HttpRequestHandler
+     */
+
+    private TestServer? _testServer;
+    private HttpClient? _testClient;
+    private HttpRequestHandler _httpRequestHandler;
+
+    [TestInitialize]
+    public void TestInitialize()
+    {
+        _testServer = new TestServer(new WebHostBuilder()
+            .UseStartup<Startup>());
+        _testClient = _testServer.CreateClient();
+        _httpRequestHandler = new HttpRequestHandler(_testClient);
+        Dictionary<int, string> temp = new Dictionary<int, string>();
+        temp.Add(3, "xxx.xxx.xxx.x");
+        temp.Add(2, "xxx.xxx.xxx.x");
+        _httpRequestHandler.SetUriValues(temp);
+    }
+    [TestMethod]
+    public async Task HttpRequestHandler001_SendRawData_NoContent_ReturnsCode()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            StringContent content = null;
+            HttpResponseMessage response = await _httpRequestHandler.SendRawData(content).ConfigureAwait(true);
+
+            // Arrange
+#if DEBUG
+            Assert.IsTrue(response.IsSuccessStatusCode);
+#else
+            Assert.IsFalse(response.IsSuccessStatusCode);
+#endif
+        }
+    }
+    [TestMethod]
+    public async Task HttpRequestHandler002_TogglePayload_true_ReturnsCode()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            StringContent content = null;
+            HttpResponseMessage response = await _httpRequestHandler.TogglePayload(true).ConfigureAwait(true);
+
+            // Arrange
+#if DEBUG
+            Assert.IsTrue(response.IsSuccessStatusCode);
+#else
+                Assert.IsFalse(response.IsSuccessStatusCode);
+#endif
+        }
+
+    }
+}
+
+public class TestPacketData
+{
+    public string verb;
+    public string uri;
+    public TestRawData data;
+}
+public class TestRawData
+{
+    public string raw;
+    public int sequence;
 }
