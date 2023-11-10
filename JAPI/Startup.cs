@@ -82,7 +82,7 @@ public class Startup
 
                     if (!handler.GetTelemetry().UpdateShipDirection(xCoord, yCoord, zCoord, pitch, yaw, roll))
                     {
-                        ctx.Response.StatusCode = StatusCodes.Status501NotImplemented; //Not right status code
+                        ctx.Response.StatusCode = StatusCodes.Status501NotImplemented; //Not right status code (Not Tested)
                         return;
                     }
                     else

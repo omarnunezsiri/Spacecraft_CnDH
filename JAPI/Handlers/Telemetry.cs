@@ -167,7 +167,7 @@ public class Telemetry
 
     public bool UpdateShipDirection(float xCoord, float yCoord, float zCoord, float pitch, float yaw, float roll)
     {
-        if (this == null || this.coordinate == null || this.rotation == null) { return false; }
+        if (this == null || this.coordinate == null || this.rotation == null) { return false; } //Don't need, we initialize
         this.coordinate.x = xCoord;
         this.coordinate.y = yCoord;
         this.coordinate.z = zCoord;

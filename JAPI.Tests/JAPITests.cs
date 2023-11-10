@@ -67,6 +67,72 @@ public class JAPITests
             Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode, "Error code received is not expected 204");
         }
     }
+
+    [TestMethod]
+    public async Task JAPI003_PointRoute_MethodNotAllowed_Returns405()
+    {
+        if (_testClient is not null)
+        {
+            //Arrange and Act
+            TelemetryHandler handler = TelemetryHandler.Instance();
+            handler.GetTelemetry().status.chargeStatus = true;
+            var requestData = new Telemetry
+            {
+                coordinate = new Coordinate(1, 2.5f, 3),
+                rotation = new Rotation(0, 0.8f, 1.2f)
+            };
+            string jsonBody = JsonConvert.SerializeObject(requestData);
+            HttpContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+            var response = await _testClient.PutAsync("/point?ID=1", content).ConfigureAwait(true);
+
+            //Arrange
+            Assert.AreEqual(HttpStatusCode.MethodNotAllowed, response.StatusCode, "Error code received is not expected 405");
+        }
+    }
+
+    [TestMethod]
+    public async Task JAPI004_PointRoute_BadRequest_Return400()
+    {
+        if (_testClient is not null)
+        {
+            //Arrange and Act
+            TelemetryHandler handler = TelemetryHandler.Instance();
+            handler.GetTelemetry().status.chargeStatus = false;
+            var requestData = new Telemetry
+            {
+                coordinate = null,
+                rotation = null
+            };
+            string jsonBody = JsonConvert.SerializeObject(requestData);
+            HttpContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+            var response = await _testClient.PutAsync("/point?ID=1", content).ConfigureAwait(true);
+
+            //Arrange
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode, "Error code received is not expected 400");
+        }
+    }
+
+    [TestMethod]
+    public async Task JAPI005_PointRoute_OK_Return200()
+    {
+        if (_testClient is not null)
+        {
+            //Arrange and Act
+            TelemetryHandler handler = TelemetryHandler.Instance();
+            handler.GetTelemetry().status.chargeStatus = false;
+            var requestData = new Telemetry
+            {
+                coordinate = new Coordinate(1, 2.5f, 3),
+                rotation = new Rotation(0, 0.8f, 1.2f)
+            };
+            string jsonBody = JsonConvert.SerializeObject(requestData);
+            HttpContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+            var response = await _testClient.PutAsync("/point?ID=1", content).ConfigureAwait(true);
+
+            //Arrange
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, "Error code received is not expected 200");
+        }
+    }
 }
 
 [TestClass]
