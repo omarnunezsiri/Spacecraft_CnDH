@@ -36,6 +36,8 @@ public class HttpRequestHandler : Controller
     private const int SpacePayload = 2;
     // port number
     private const string portNumber = ":8080";
+    // protocol
+    private const string start = "http://";
 
     #region HttpRequests
     /// <summary>
@@ -46,16 +48,24 @@ public class HttpRequestHandler : Controller
     public async Task<HttpResponseMessage> SendRawData(HttpContent ctx)
     {
         // Uri
-        string apiUrl = UriValues[SpaceUpDown] + portNumber + "/C&DH_Receive";
+        string apiUrl = start + UriValues[SpaceUpDown] + portNumber + "/C&DH_Receive";
 
         // Create post
-#if DEBUG
         HttpResponseMessage response = new HttpResponseMessage();
-        response.StatusCode = HttpStatusCode.OK;
-        response.Content = new StringContent("No Content");
+        try
+        {
+#if DEBUG
+            response.StatusCode = HttpStatusCode.OK;
+            response.Content = new StringContent("No Content");
 #else
-        HttpResponseMessage response = await _httpClient.PostAsync(apiUrl , ctx).ConfigureAwait(true);
+            response = await _httpClient.PostAsync(apiUrl, ctx).ConfigureAwait(true);
 #endif
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return response;
+        }
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -70,15 +80,24 @@ public class HttpRequestHandler : Controller
     public async Task<HttpResponseMessage> TogglePayload(bool state)
     {
         // Uri
-        string apiUrl = UriValues[SpacePayload] + portNumber + "/payloadState?state=" + state.ToString().ToLowerInvariant();
+        string apiUrl = start + UriValues[SpacePayload] + portNumber + "/payloadState?state=" + state.ToString().ToLowerInvariant();
         // Create post
-#if DEBUG
         HttpResponseMessage response = new HttpResponseMessage();
-        response.StatusCode = HttpStatusCode.OK;
-        response.Content = new StringContent("No Content");
+        try
+        {
+#if DEBUG
+            response = new HttpResponseMessage();
+            response.StatusCode = HttpStatusCode.OK;
+            response.Content = new StringContent("No Content");
 #else
-        HttpResponseMessage response = await _httpClient.PutAsync(apiUrl, null).ConfigureAwait(true);
+            response = await _httpClient.PutAsync(apiUrl, null).ConfigureAwait(true);
 #endif
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return response;
+        }
 
         TelemetryHandler telem = TelemetryHandler.Instance();
 
