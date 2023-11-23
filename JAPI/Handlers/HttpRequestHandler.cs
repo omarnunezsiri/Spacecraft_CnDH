@@ -64,15 +64,24 @@ public class HttpRequestHandler : Controller
     public async Task<HttpResponseMessage> SendPackagedData(StringContent content, int ID)
     {
         // Uri
+        StringContent requestContent;
         string apiUrl = UriValues[SpaceUpDown] + ":8080/C&DH_Received";
-        var requestData = new Packet
+        Console.WriteLine(apiUrl);
+        try
         {
-            verb = "PUT",
-            uri = UriValues[ID] + ":8080/telemetry",
-            content = content
-        };
-        var sendData = JsonSerializer.Serialize(requestData);
-        var requestContent = new StringContent(sendData, Encoding.UTF8, "application/json");
+            var requestData = new Packet();
+            requestData.verb = "PUT";
+            requestData.uri = UriValues[ID] + ":8080/telemetry";
+            requestData.content = content.ReadAsStringAsync().Result;
+            var sendData = JsonSerializer.Serialize(requestData);
+            requestContent = new StringContent(sendData, Encoding.UTF8, "application/json");
+            string requestConverted = requestContent.ReadAsStringAsync().Result;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
 
 #if DEBUG
         HttpResponseMessage response = new HttpResponseMessage();
@@ -101,5 +110,5 @@ public class Packet
 {
     public string verb { get; set; }
     public string uri { get; set; }
-    public StringContent content { get; set; }
+    public String content { get; set; }
 }

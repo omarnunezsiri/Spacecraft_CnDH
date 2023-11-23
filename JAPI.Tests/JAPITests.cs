@@ -401,6 +401,28 @@ public class HttpRequestTests
 #endif
         }
     }
+
+    [TestMethod]
+    public async Task HttpRequestHandler002_SendRawData_ReturnsCode()
+    {
+        //Arrange and Act
+        TestRawData data = new TestRawData();
+        data.raw = "raw";
+        data.sequence = 69;
+        string sendData = System.Text.Json.JsonSerializer.Serialize(data);
+
+        var requestContent = new StringContent(sendData, Encoding.UTF8, "application/json");
+
+        int ID = 3;
+        HttpResponseMessage response = await _httpRequestHandler.SendPackagedData(requestContent, ID).ConfigureAwait(true);
+
+        //Assert
+#if DEBUG
+        Assert.IsTrue(response.IsSuccessStatusCode);
+#else
+        Assert.IsFalse(response.IsSuccessStatusCode);
+#endif
+    }
 }
 
 public class TestPacketData
