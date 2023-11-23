@@ -1,6 +1,7 @@
 // The Spacecraft C&DH Team licenses this file to you under the MIT license.
 
 namespace JAPI.Handlers;
+
 #region All Classes
 #region Coordinate Class
 /// <summary>
@@ -94,10 +95,33 @@ public class Rotation
 /// </summary>
 public class Status
 {
+    public static readonly float VoltageMin = 11.5f;
+    public static readonly float VoltageMax = 13.5f;
+
     public bool payloadPower { get; set; }
     public bool dataWaiting { get; set; }
     public bool chargeStatus { get; set; }
-    public float voltage { get; set; }
+
+    private float _voltage;
+    public float voltage
+    {
+        get { return _voltage; }
+        set
+        {
+            if (value < VoltageMin)
+            {
+                _voltage = VoltageMin;
+            }
+            else if (value > VoltageMax)
+            {
+                _voltage = VoltageMax;
+            }
+            else
+            {
+                _voltage = value;
+            }
+        }
+    }
 
     /// <summary>
     /// This is the constructor for the Status class
@@ -113,6 +137,7 @@ public class Status
         this.chargeStatus = chargeStatus;
         this.voltage = voltage;
     }
+
     public override bool Equals(object? obj)
     {
         //Check for null and compare run-time types.
@@ -140,11 +165,58 @@ public class Status
 /// </summary>
 public class Telemetry
 {
+    public static readonly float LowestTemperature = 11.0f;
+    public static readonly float HighestTemperature = 13.0f;
+    public static readonly float MaxFuel = 100.0f;
+    public static readonly float MinFuel;
+
     public Coordinate? coordinate { get; set; }
     public Rotation? rotation { get; set; }
-    public float fuel { get; set; }
-    public float temp { get; set; }
+
+    private float _fuel;
+    public float fuel
+    {
+        get { return _fuel; }
+        set
+        {
+            if (value < MinFuel)
+            {
+                _fuel = MinFuel;
+            }
+            else if (value > MaxFuel)
+            {
+                _fuel = MaxFuel;
+            }
+            else
+            {
+                _fuel = value;
+            }
+        }
+    }
+
+    private float _temp;
+    public float temp
+    {
+        get { return _temp; }
+        set
+        {
+            if (value < LowestTemperature)
+            {
+                _temp = LowestTemperature;
+            }
+            else if (value > HighestTemperature)
+            {
+                _temp = HighestTemperature;
+            }
+            else
+            {
+                _temp = value;
+            }
+        }
+    }
+
     public Status? status { get; set; }
+
     public override bool Equals(object? obj)
     {
         //Check for null and compare run-time types.
