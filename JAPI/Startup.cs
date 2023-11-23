@@ -28,9 +28,11 @@ public class Startup
         {
             app.UseSwagger();
             app.UseSwaggerUI();
+
         }
 
         app.UseRouting();
+        app.UseHttpLogging();
 
         #region Endpoints
         app.UseEndpoints(endpoints =>
