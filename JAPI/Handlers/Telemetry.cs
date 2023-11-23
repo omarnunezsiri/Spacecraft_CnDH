@@ -168,7 +168,7 @@ public class Telemetry
     public static readonly float LowestTemperature = 11.0f;
     public static readonly float HighestTemperature = 13.0f;
     public static readonly float MaxFuel = 100.0f;
-    public static readonly float MinFuel;
+    public static readonly float MinFuel = 15.0f;
 
     public Coordinate? coordinate { get; set; }
     public Rotation? rotation { get; set; }

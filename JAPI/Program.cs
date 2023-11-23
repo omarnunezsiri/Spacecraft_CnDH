@@ -37,7 +37,7 @@ Startup.SendHandler.SetUriValues(serviceDictionary);
 TelemetryHandler telemetryHandler = TelemetryHandler.Instance();
 CancellationTokenSource cancellationTokenSource = new();
 
-double executeSimulation = 3000.0; // execute the simulation every <value> milliseconds
+double executeSimulation = 30000.0; // execute the simulation every <value> milliseconds
 
 /* Start async simulation worker */
 Task simulationTask = Task.Run(() =>
