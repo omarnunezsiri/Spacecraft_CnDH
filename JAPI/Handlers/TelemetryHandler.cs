@@ -78,6 +78,16 @@ public class TelemetryHandler
                     Console.WriteLine($"Stopwatch has reached {executeSimulation} milliseconds...executing simulation");
                     Console.ForegroundColor = ConsoleColor.White;
 
+                    /* Charge if spacecraft's fuel reaches the minimum. Stop charging when it reaches the max. */
+                    if (telemetry.fuel == Telemetry.MinFuel)
+                    {
+                        telemetry.status.chargeStatus = true;
+                    }
+                    else if (telemetry.fuel == Telemetry.MaxFuel)
+                    {
+                        telemetry.status.chargeStatus = false;
+                    }
+
                     /* If the charge status is set to on, the fuel (battery) will go up. Down otherwise. */
                     if (telemetry.status.chargeStatus is true)
                     {
