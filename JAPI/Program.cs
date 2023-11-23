@@ -27,11 +27,11 @@ Console.WriteLine("Service IpConfigFile reading completed without any errors.");
 Console.ForegroundColor = ConsoleColor.White;
 
 var app = CreateHostBuilder(args).Build();
-using (var scope = app.Services.CreateScope())
-{
-    Startup.SendHandler = scope.ServiceProvider.GetService<HttpRequestHandler>();
-    Startup.SendHandler.SetUriValues(serviceDictionary);
-}
+// setting up http client for outgoing requests
+var scope = app.Services.CreateScope();
+Startup.SendHandler = scope.ServiceProvider.GetService<HttpRequestHandler>();
+Startup.SendHandler.SetUriValues(serviceDictionary);
+
 app.Run();
 
 #region Helpers
