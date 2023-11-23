@@ -579,7 +579,7 @@ public class HttpRequestTests
             StringContent content = null;
             HttpResponseMessage response = await _httpRequestHandler.SendRawData(content).ConfigureAwait(true);
 
-            // Arrange
+            // Assert
 #if DEBUG
             Assert.IsTrue(response.IsSuccessStatusCode);
 #else
@@ -596,14 +596,54 @@ public class HttpRequestTests
             StringContent content = null;
             HttpResponseMessage response = await _httpRequestHandler.TogglePayload(true).ConfigureAwait(true);
 
-            // Arrange
+            // Assert
 #if DEBUG
             Assert.IsTrue(response.IsSuccessStatusCode);
 #else
-                Assert.IsFalse(response.IsSuccessStatusCode);
+            Assert.IsFalse(response.IsSuccessStatusCode);
 #endif
         }
 
+    }
+
+    [TestMethod]
+    public async Task HttpRequestHandler003_RequestLinkStatus_NoInput_ReturnsTrue()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            bool status = await _httpRequestHandler.RequestLinkStatus().ConfigureAwait(true);
+
+            // Assert
+#if DEBUG
+            Assert.IsTrue(status);
+#else
+            Assert.IsFalse(status);
+#endif
+
+        }
+    }
+
+    [TestMethod]
+    public async Task HttpRequestHandler002_SendRawData_ReturnsCode()
+    {
+        //Arrange and Act
+        TestRawData data = new TestRawData();
+        data.raw = "raw";
+        data.sequence = 69;
+        string sendData = System.Text.Json.JsonSerializer.Serialize(data);
+
+        var requestContent = new StringContent(sendData, Encoding.UTF8, "application/json");
+
+        int ID = 3;
+        HttpResponseMessage response = await _httpRequestHandler.SendPackagedData(requestContent, ID).ConfigureAwait(true);
+
+        //Assert
+#if DEBUG
+        Assert.IsTrue(response.IsSuccessStatusCode);
+#else
+        Assert.IsFalse(response.IsSuccessStatusCode);
+#endif
     }
 }
 
