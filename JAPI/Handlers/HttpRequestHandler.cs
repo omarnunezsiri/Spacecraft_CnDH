@@ -173,7 +173,6 @@ public class HttpRequestHandler : Controller
         return response;
 
     }
-}
 
     /// <summary>
     /// Request the status of the link from the space uplink/downlink and return the bool recieved
@@ -221,8 +220,8 @@ public class HttpRequestHandler : Controller
         }
         return status;
     }
+    #endregion
 }
-#endregion
 
 public class Packet
 {
