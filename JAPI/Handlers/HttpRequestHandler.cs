@@ -1,6 +1,7 @@
 // The Spacecraft C&DH Team licenses this file to you under the MIT license.
 
 using System.Net;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 namespace JAPI.Handlers;
 
@@ -126,6 +127,53 @@ public class HttpRequestHandler : Controller
             Console.WriteLine($"API Request failed with status code: {response.StatusCode}");
         }
         return response;
+    }
+
+    /// <summary>
+    /// Request the status of the link from the space uplink/downlink and return the bool recieved
+    /// </summary>
+    /// <returns></returns>
+    public async Task<bool> RequestLinkStatus()
+    {
+        // Uri
+        string apiUrl = start + UriValues[SpaceUpDown] + portNumber + "/GroundConnection";
+
+        // Create response variable
+        HttpResponseMessage response = new HttpResponseMessage();
+        string responseContent;
+        // status variable
+        bool status = false;
+        try
+        {
+#if DEBUG
+            response.StatusCode = HttpStatusCode.OK;
+            // create dummy data
+            var jsonObject = new { status = true };
+            var jsonContent = JsonSerializer.Serialize(jsonObject);
+            response.Content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
+            responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+#else
+            // send request & read content as string
+            response = await _httpClient.GetAsync(apiUrl).ConfigureAwait(true);
+            responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+#endif
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return status;
+        }
+        if (response.IsSuccessStatusCode)
+        {
+            Console.WriteLine($"API Success Response: {responseContent}");
+            JsonDocument jsonDocument = JsonDocument.Parse(responseContent);
+            status = jsonDocument.RootElement.GetProperty("status").GetBoolean();
+        }
+        else
+        {
+            Console.WriteLine($"API Failed Response: {responseContent}");
+        }
+        return status;
     }
 }
 #endregion
