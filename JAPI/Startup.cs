@@ -66,7 +66,7 @@ public class Startup
             // Point command
             endpoints.MapPut("/point", async ([FromQuery(Name = "ID")] int source, HttpContext ctx) =>
             {
-                //Check if chargin
+                // Check if charging
                 TelemetryHandler handler = TelemetryHandler.Instance();
                 if (handler.GetTelemetry().status.chargeStatus == true)
                 {

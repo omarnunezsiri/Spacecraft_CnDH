@@ -1,1 +1,1 @@
-{"coordinate":{"x":2,"y":3,"z":4},"rotation":{"p":5,"y":6,"r":7},"fuel":0.75,"temp":28,"status":{"payloadPower":true,"dataWaiting":true,"chargeStatus":false,"voltage":69}}
+{"coordinate":{"x":0,"y":0,"z":0},"rotation":{"p":0,"y":0,"r":0},"fuel":94,"temp":12.200002,"status":{"payloadPower":false,"dataWaiting":false,"chargeStatus":false,"voltage":13.5}}
