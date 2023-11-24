@@ -9,7 +9,7 @@ public class TelemetryHandler
     /* Class members */
     private static TelemetryHandler? _instance;
     private readonly Telemetry telemetry = new();
-    private readonly Mutex _mutex = new Mutex(false);
+    public static readonly Mutex _mutex = new Mutex(false);
     private static readonly object _instanceLocker = new();
 
     /* Utility variables for simulation */
@@ -122,6 +122,7 @@ public class TelemetryHandler
 
                     /* Critical section (update telemetry in-memory and to the database (json file) */
                     _mutex.WaitOne();
+                    //Thread.Sleep(2500); // testing purposes (not required for main functionality)
                     telemetry.fuel = newFuel;
                     telemetry.temp = newTemperature;
                     telemetry.status.voltage = newVoltage;
@@ -130,7 +131,7 @@ public class TelemetryHandler
 
                     stopwatch.Restart(); // restart the timestep
 
-                    Console.WriteLine($"{telemetry.fuel} ---> {telemetry.temp} ---> {telemetry.status.voltage}");
+                    Console.WriteLine($"{nameof(telemetry.fuel)}: {telemetry.fuel} ---> {nameof(telemetry.temp)}: {telemetry.temp} ---> {nameof(telemetry.status.voltage)}: {telemetry.status.voltage}");
                 }
                 else
                 {
