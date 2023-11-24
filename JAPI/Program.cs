@@ -27,12 +27,36 @@ Console.WriteLine("Service IpConfigFile reading completed without any errors.");
 Console.ForegroundColor = ConsoleColor.White;
 
 var app = CreateHostBuilder(args).Build();
-using (var scope = app.Services.CreateScope())
+// setting up http client for outgoing requests
+var scope = app.Services.CreateScope();
+
+Startup.SendHandler = scope.ServiceProvider.GetService<HttpRequestHandler>();
+Startup.SendHandler.SetUriValues(serviceDictionary);
+
+/* Simulation utilities */
+TelemetryHandler telemetryHandler = TelemetryHandler.Instance();
+CancellationTokenSource cancellationTokenSource = new();
+
+double executeSimulation = 500.0; // execute the simulation every <value> milliseconds
+
+/* Start async simulation worker */
+Task simulationTask = Task.Run(() =>
 {
-    Startup.SendHandler = scope.ServiceProvider.GetService<HttpRequestHandler>();
-    Startup.SendHandler.SetUriValues(serviceDictionary);
-}
+    telemetryHandler.FlyThroughSpace("TelemetryData.json", executeSimulation, fileHandler, cancellationTokenSource.Token);
+});
+
 app.Run();
+
+Console.ForegroundColor = ConsoleColor.Magenta;
+Console.WriteLine("Stopping async simulation worker...");
+
+cancellationTokenSource.Cancel(); // signal the simulation worker to stop
+
+simulationTask.Wait(); // block until the simulation worker is done
+
+Console.ForegroundColor = ConsoleColor.Yellow;
+Console.WriteLine("Async simulation worker has been stopped!");
+Console.ForegroundColor = ConsoleColor.White;
 
 #region Helpers
 static IHostBuilder CreateHostBuilder(string[] args) =>

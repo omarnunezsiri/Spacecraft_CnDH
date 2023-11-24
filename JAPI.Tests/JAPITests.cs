@@ -320,6 +320,7 @@ public class DataTests
 {
 
     Telemetry telemetryData;
+    readonly Random _random = new();
 
     public void Setup(Coordinate? coord, Rotation? rot, float fuel, float temp, Status status)
     {
@@ -397,6 +398,153 @@ public class DataTests
         //Assert
         Assert.AreEqual(expectedResult, telemetryData.rotation);
     }
+
+    [TestMethod]
+    public void DATA006_SetFuel_OutOfInnerBound_FuelIsSetToMinValue()
+    {
+        // Arrange
+        float expectedFuel = Telemetry.MinFuel;
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 0, 32, new Status(true, true, true, 50));
+
+        // Act
+        telemetryData.fuel = Telemetry.MinFuel - (float)(_random.NextDouble() * (Telemetry.MaxFuel - Telemetry.MinFuel) + Telemetry.MinFuel); // set fuel to a value out of bounds (lower than the minimum: 0)
+
+        // Assert
+        Assert.AreEqual(expectedFuel, telemetryData.fuel);
+    }
+
+    [TestMethod]
+    public void DATA007_SetFuel_OutOfUpperBound_FuelIsSetToMaxValue()
+    {
+        // Arrange
+        float expectedFuel = Telemetry.MaxFuel;
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 0, 32, new Status(true, true, true, 50));
+
+        // Act
+        telemetryData.fuel = Telemetry.MaxFuel + (float)(_random.NextDouble() * (Telemetry.MaxFuel - Telemetry.MinFuel) + Telemetry.MinFuel); // set fuel to a value out of bounds (bigger than the max: 100)
+
+        // Assert
+        Assert.AreEqual(expectedFuel, telemetryData.fuel);
+    }
+
+    [TestMethod]
+    public void DATA008_SetFuel_ValueInBounds_FuelIsSetToVal()
+    {
+        // Arrange
+        float expectedFuel = Telemetry.MinFuel + 3.69f;
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 0, 32, new Status(true, true, true, 50));
+
+        // Act
+        telemetryData.fuel = Telemetry.MinFuel + 3.69f; // set fuel to a value in bounds
+
+        // Assert
+        Assert.AreEqual(expectedFuel, telemetryData.fuel);
+    }
+
+    [TestMethod]
+    public void DATA009_SetTemperature_OutOfInnerBound_TempIsSetToMin()
+    {
+        // Arrange
+        float expectedTemp = Telemetry.LowestTemperature;
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 0, 32, new Status(true, true, true, 50));
+
+        // Act
+        telemetryData.temp = Telemetry.LowestTemperature - (float)(_random.NextDouble() * (Telemetry.HighestTemperature - Telemetry.LowestTemperature) + Telemetry.LowestTemperature);
+
+        // Assert
+        Assert.AreEqual(expectedTemp, telemetryData.temp);
+    }
+
+    [TestMethod]
+    public void DATA010_SetTemperature_OutOfUpperBound_TempIsSetToMax()
+    {
+        // Arrange
+        float expectedTemp = Telemetry.HighestTemperature;
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 0, 32, new Status(true, true, true, 50));
+
+        // Act
+        telemetryData.temp = Telemetry.HighestTemperature + (float)(_random.NextDouble() * (Telemetry.HighestTemperature - Telemetry.LowestTemperature) + Telemetry.LowestTemperature);
+
+        // Assert
+        Assert.AreEqual(expectedTemp, telemetryData.temp);
+    }
+
+    [TestMethod]
+    public void DATA011_SetTemperature_ValueInBounds_TempIsSetToVal()
+    {
+        // Arrange
+        float expectedTemp = Telemetry.HighestTemperature - 0.5f;
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 0, 32, new Status(true, true, true, 50));
+
+        // Act
+        telemetryData.temp = Telemetry.HighestTemperature - 0.5f;
+
+        // Assert
+        Assert.AreEqual(expectedTemp, telemetryData.temp);
+    }
+
+    [TestMethod]
+    public void DATA012_SetVoltage_OutLowerOfBound_VoltageIsSetToMin()
+    {
+        // Arrange
+        float expectedVoltage = Status.VoltageMin;
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 0, 32, new Status(true, true, true, 50));
+
+        // Act
+        if (telemetryData.status is not null)
+        {
+            telemetryData.status.voltage = Status.VoltageMin - (float)(_random.NextDouble() * (Status.VoltageMax - Status.VoltageMin) + Status.VoltageMin);
+
+            // Assert
+            Assert.AreEqual(expectedVoltage, telemetryData.status.voltage);
+        }
+        else
+        {
+            throw new FieldAccessException("Telemetry data status is null.");
+        }
+    }
+
+    [TestMethod]
+    public void DATA013_SetVoltage_OutUpperOfBound_VoltageIsSetToMin()
+    {
+        // Arrange
+        float expectedVoltage = Status.VoltageMax;
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 0, 32, new Status(true, true, true, 50));
+
+        // Act
+        if (telemetryData.status is not null)
+        {
+            telemetryData.status.voltage = Status.VoltageMin + (float)(_random.NextDouble() * (Status.VoltageMax - Status.VoltageMin) + Status.VoltageMin);
+
+            // Assert
+            Assert.AreEqual(expectedVoltage, telemetryData.status.voltage);
+        }
+        else
+        {
+            throw new FieldAccessException("Telemetry data status is null.");
+        }
+    }
+
+    [TestMethod]
+    public void DATA014_SetVoltage_OnBounds_VoltageIsSetToVal()
+    {
+        // Arrange
+        float expectedVoltage = Status.VoltageMin + 0.6f;
+        Setup(new Coordinate(1, 2, 3), new Rotation(4, 5, 6), 0, 32, new Status(true, true, true, 50));
+
+        // Act
+        if (telemetryData.status is not null)
+        {
+            telemetryData.status.voltage = Status.VoltageMin + 0.6f;
+
+            // Assert
+            Assert.AreEqual(expectedVoltage, telemetryData.status.voltage);
+        }
+        else
+        {
+            throw new FieldAccessException("Telemetry data status is null.");
+        }
+    }
 }
 
 [TestClass]
@@ -431,7 +579,7 @@ public class HttpRequestTests
             StringContent content = null;
             HttpResponseMessage response = await _httpRequestHandler.SendRawData(content).ConfigureAwait(true);
 
-            // Arrange
+            // Assert
 #if DEBUG
             Assert.IsTrue(response.IsSuccessStatusCode);
 #else
@@ -448,14 +596,54 @@ public class HttpRequestTests
             StringContent content = null;
             HttpResponseMessage response = await _httpRequestHandler.TogglePayload(true).ConfigureAwait(true);
 
-            // Arrange
+            // Assert
 #if DEBUG
             Assert.IsTrue(response.IsSuccessStatusCode);
 #else
-                Assert.IsFalse(response.IsSuccessStatusCode);
+            Assert.IsFalse(response.IsSuccessStatusCode);
 #endif
         }
 
+    }
+
+    [TestMethod]
+    public async Task HttpRequestHandler003_RequestLinkStatus_NoInput_ReturnsTrue()
+    {
+        if (_testClient is not null)
+        {
+            // Arrange and Act
+            bool status = await _httpRequestHandler.RequestLinkStatus().ConfigureAwait(true);
+
+            // Assert
+#if DEBUG
+            Assert.IsTrue(status);
+#else
+            Assert.IsFalse(status);
+#endif
+
+        }
+    }
+
+    [TestMethod]
+    public async Task HttpRequestHandler002_SendRawData_ReturnsCode()
+    {
+        //Arrange and Act
+        TestRawData data = new TestRawData();
+        data.raw = "raw";
+        data.sequence = 69;
+        string sendData = System.Text.Json.JsonSerializer.Serialize(data);
+
+        var requestContent = new StringContent(sendData, Encoding.UTF8, "application/json");
+
+        int ID = 3;
+        HttpResponseMessage response = await _httpRequestHandler.SendPackagedData(requestContent, ID).ConfigureAwait(true);
+
+        //Assert
+#if DEBUG
+        Assert.IsTrue(response.IsSuccessStatusCode);
+#else
+        Assert.IsFalse(response.IsSuccessStatusCode);
+#endif
     }
 }
 

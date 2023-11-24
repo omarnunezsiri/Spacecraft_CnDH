@@ -28,9 +28,11 @@ public class Startup
         {
             app.UseSwagger();
             app.UseSwaggerUI();
+
         }
 
         app.UseRouting();
+        app.UseHttpLogging();
 
         #region Endpoints
         app.UseEndpoints(endpoints =>
@@ -38,8 +40,29 @@ public class Startup
             // Telemetry Request
             endpoints.MapGet("/telemetry", ([FromQuery(Name = "ID")] int source, HttpContext ctx) =>
             {
-                /* Configure the response */
-                ctx.Response.StatusCode = StatusCodes.Status501NotImplemented;
+                Telemetry? getTelemetryData = new Telemetry();
+                FileHandler fileHandler = FileHandler.GetFileHandler();
+
+                /* Critical section: multiple threads access telemetry data so they must be in sync */
+                TelemetryHandler._mutex.WaitOne();
+                getTelemetryData = fileHandler.ReadTelemetryData("TelemetryData.json");
+                TelemetryHandler._mutex.ReleaseMutex();
+
+                if (getTelemetryData == null)
+                {
+                    ctx.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                    return;
+                }
+                else
+                {
+                    ctx.Response.StatusCode = StatusCodes.Status200OK;
+                    ctx.Response.CompleteAsync();
+                }
+
+                var sendData = JsonSerializer.Serialize(getTelemetryData);
+                var requestContent = new StringContent(sendData, Encoding.UTF8, "application/json");
+
+                SendHandler.SendPackagedData(requestContent, source);
             })
             .WithName("telemetry")
             .WithOpenApi();
@@ -47,7 +70,7 @@ public class Startup
             // Point command
             endpoints.MapPut("/point", async ([FromQuery(Name = "ID")] int source, HttpContext ctx) =>
             {
-                //Check if chargin
+                // Check if charging
                 TelemetryHandler handler = TelemetryHandler.Instance();
                 if (handler.GetTelemetry().status.chargeStatus == true)
                 {
@@ -80,7 +103,12 @@ public class Startup
                     float yaw = payload.rotation.y;
                     float roll = payload.rotation.r;
 
-                    if (!handler.GetTelemetry().UpdateShipDirection(xCoord, yCoord, zCoord, pitch, yaw, roll))
+                    /* Critical section: multiple threads access telemetry data so they must be in sync */
+                    TelemetryHandler._mutex.WaitOne();
+                    bool wasUpdated = handler.GetTelemetry().UpdateShipDirection(xCoord, yCoord, zCoord, pitch, yaw, roll);
+                    TelemetryHandler._mutex.ReleaseMutex();
+
+                    if (!wasUpdated)
                     {
                         ctx.Response.StatusCode = StatusCodes.Status501NotImplemented; //Not right status code (Not Tested)
                         return;
