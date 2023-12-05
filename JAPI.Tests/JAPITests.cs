@@ -44,7 +44,7 @@ public class JAPITests
     }
 
     [TestMethod]
-    public async Task JAPI002_downloadImage_NoContent_Returns204()
+    public async Task JAPI002_downloadImage_NoContent_Returns200()
     {
         if (_testClient is not null)
         {
@@ -65,7 +65,7 @@ public class JAPITests
             var response = await _testClient.PostAsync("/downloadImage", content).ConfigureAwait(true);
 
             // Arrange
-            Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode, "Error code received is not expected 204");
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode, "Error code received is not expected 204");
         }
     }
 
@@ -625,18 +625,18 @@ public class HttpRequestTests
     }
 
     [TestMethod]
-    public async Task HttpRequestHandler002_SendRawData_ReturnsCode()
+    public async Task HttpRequestHandler002_SendPackagedData_ReturnsCode()
     {
         //Arrange and Act
-        TestRawData data = new TestRawData();
-        data.raw = "raw";
-        data.sequence = 69;
-        string sendData = System.Text.Json.JsonSerializer.Serialize(data);
-
-        var requestContent = new StringContent(sendData, Encoding.UTF8, "application/json");
+        Telemetry telemetryData = new();
+        telemetryData.coordinate = new Coordinate(0.6f, 0.7f, 0.1f);
+        telemetryData.rotation = new Rotation(0.10f, 0.69f, 0.5f);
+        telemetryData.fuel = 50f;
+        telemetryData.temp = 21.5f;
+        telemetryData.status = new Status(true, true, true, 0.000001f);
 
         int ID = 3;
-        HttpResponseMessage response = await _httpRequestHandler.SendPackagedData(requestContent, ID).ConfigureAwait(true);
+        HttpResponseMessage response = await _httpRequestHandler.SendPackagedData(telemetryData, ID).ConfigureAwait(true);
 
         //Assert
 #if DEBUG

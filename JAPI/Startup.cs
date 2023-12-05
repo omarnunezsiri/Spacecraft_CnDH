@@ -62,7 +62,7 @@ public class Startup
                 var sendData = JsonSerializer.Serialize(getTelemetryData);
                 var requestContent = new StringContent(sendData, Encoding.UTF8, "application/json");
 
-                SendHandler.SendPackagedData(requestContent, source);
+                SendHandler.SendPackagedData(getTelemetryData, source);
             })
             .WithName("telemetry")
             .WithOpenApi();
@@ -129,7 +129,7 @@ public class Startup
             endpoints.MapPost("/downloadImage", async (HttpContext ctx) =>
             {
                 /* Configure the response */
-                ctx.Response.StatusCode = StatusCodes.Status204NoContent;
+                ctx.Response.StatusCode = StatusCodes.Status200OK; // payload ops requires 200OK instead of 204NoContent
 
                 /* Send Response*/
                 ctx.Response.CompleteAsync();
