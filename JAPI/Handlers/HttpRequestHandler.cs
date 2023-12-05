@@ -130,22 +130,24 @@ public class HttpRequestHandler : Controller
         return response;
     }
 
-    public async Task<HttpResponseMessage> SendPackagedData(StringContent content, int ID)
+    public async Task<HttpResponseMessage> SendPackagedData(Telemetry telemetry, int ID)
     {
         // Uri
         StringContent requestContent;
-        string apiUrl = UriValues[SpaceUpDown] + ":8080/C&DH_Received";
+        string apiUrl = start + UriValues[SpaceUpDown] + portNumber + "/C&DH_Receive";
         Console.WriteLine(apiUrl);
         try
         {
             var requestData = new Packet();
             requestData.verb = "PUT";
             requestData.uri = UriValues[ID] + ":8080/telemetry";
-            requestData.content = content.ReadAsStringAsync().Result;
+            requestData.content = telemetry;
             var sendData = JsonSerializer.Serialize(requestData);
             requestContent = new StringContent(sendData, Encoding.UTF8, "application/json");
             string requestConverted = requestContent.ReadAsStringAsync().Result;
-
+#if DEBUG
+            Console.WriteLine($"requestConverted in DEBUG\n{requestConverted}");
+#endif
         }
         catch (Exception ex)
         {
@@ -227,5 +229,5 @@ public class Packet
 {
     public string verb { get; set; }
     public string uri { get; set; }
-    public String content { get; set; }
+    public object content { get; set; }
 }
