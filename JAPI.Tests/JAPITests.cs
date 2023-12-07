@@ -625,7 +625,18 @@ public class HttpRequestTests
     }
 
     [TestMethod]
-    public async Task HttpRequestHandler002_SendPackagedData_ReturnsCode()
+    public async Task HttpRequestHandler002_SendRawData_ReturnsCode()
+    {
+        //Arrange and Act
+        TestRawData data = new TestRawData();
+        data.raw = "raw";
+        data.sequence = 69;
+        _ = System.Text.Json.JsonSerializer.Serialize(data);
+
+    }
+
+    [TestMethod]
+    public async Task HttpRequestHandler004_SendPackagedData_ReturnsCode()
     {
         //Arrange and Act
         Telemetry telemetryData = new();
