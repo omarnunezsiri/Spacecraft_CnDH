@@ -88,7 +88,6 @@ public class HttpRequestHandler : Controller
         try
         {
 #if DEBUG
-            response = new HttpResponseMessage();
             response.StatusCode = HttpStatusCode.OK;
             response.Content = new StringContent("No Content");
 #else
@@ -154,15 +153,22 @@ public class HttpRequestHandler : Controller
             Console.WriteLine(ex.Message);
             throw;
         }
-
-#if DEBUG
         HttpResponseMessage response = new HttpResponseMessage();
-        response.StatusCode = HttpStatusCode.OK;
-        response.Content = new StringContent("No Content");
+        try
+        {
+#if DEBUG
+            response.StatusCode = HttpStatusCode.OK;
+            response.Content = new StringContent("No Content");
 #else
-        HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, requestContent).ConfigureAwait(true);
+            response = await _httpClient.PostAsync(apiUrl, requestContent).ConfigureAwait(true);
 
 #endif
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return response;
+        }
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
