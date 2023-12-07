@@ -88,7 +88,6 @@ public class HttpRequestHandler : Controller
         try
         {
 #if DEBUG
-            response = new HttpResponseMessage();
             response.StatusCode = HttpStatusCode.OK;
             response.Content = new StringContent("No Content");
 #else
@@ -130,37 +129,46 @@ public class HttpRequestHandler : Controller
         return response;
     }
 
-    public async Task<HttpResponseMessage> SendPackagedData(StringContent content, int ID)
+    public async Task<HttpResponseMessage> SendPackagedData(Telemetry telemetry, int ID)
     {
         // Uri
         StringContent requestContent;
-        string apiUrl = UriValues[SpaceUpDown] + ":8080/C&DH_Received";
+        string apiUrl = start + UriValues[SpaceUpDown] + portNumber + "/C&DH_Receive";
         Console.WriteLine(apiUrl);
         try
         {
             var requestData = new Packet();
             requestData.verb = "PUT";
             requestData.uri = UriValues[ID] + ":8080/telemetry";
-            requestData.content = content.ReadAsStringAsync().Result;
+            requestData.content = telemetry;
             var sendData = JsonSerializer.Serialize(requestData);
             requestContent = new StringContent(sendData, Encoding.UTF8, "application/json");
             string requestConverted = requestContent.ReadAsStringAsync().Result;
-
+#if DEBUG
+            Console.WriteLine($"requestConverted in DEBUG\n{requestConverted}");
+#endif
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
             throw;
         }
-
-#if DEBUG
         HttpResponseMessage response = new HttpResponseMessage();
-        response.StatusCode = HttpStatusCode.OK;
-        response.Content = new StringContent("No Content");
+        try
+        {
+#if DEBUG
+            response.StatusCode = HttpStatusCode.OK;
+            response.Content = new StringContent("No Content");
 #else
-        HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, requestContent).ConfigureAwait(true);
+            response = await _httpClient.PostAsync(apiUrl, requestContent).ConfigureAwait(true);
 
 #endif
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return response;
+        }
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
@@ -227,5 +235,5 @@ public class Packet
 {
     public string verb { get; set; }
     public string uri { get; set; }
-    public String content { get; set; }
+    public object content { get; set; }
 }

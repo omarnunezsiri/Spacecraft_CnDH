@@ -62,7 +62,7 @@ public class Startup
                 var sendData = JsonSerializer.Serialize(getTelemetryData);
                 var requestContent = new StringContent(sendData, Encoding.UTF8, "application/json");
 
-                SendHandler.SendPackagedData(requestContent, source);
+                SendHandler.SendPackagedData(getTelemetryData, source);
             })
             .WithName("telemetry")
             .WithOpenApi();
@@ -129,21 +129,19 @@ public class Startup
             endpoints.MapPost("/downloadImage", async (HttpContext ctx) =>
             {
                 /* Configure the response */
-                ctx.Response.StatusCode = StatusCodes.Status204NoContent;
+                ctx.Response.StatusCode = StatusCodes.Status200OK; // payload ops requires 200OK instead of 204NoContent
+
+                /* Required Action */
+                // Read the content from the request body
+                StreamReader reader = new StreamReader(ctx.Request.Body, Encoding.UTF8);
+                var requestBody = reader.ReadToEndAsync();
+                // Create an HttpContent from the request body
+                var requestContent = new StringContent(requestBody.Result, Encoding.UTF8, "application/json");
 
                 /* Send Response*/
                 ctx.Response.CompleteAsync();
 
-                /* Required Action */
-                // Read the content from the request body
-                using (StreamReader reader = new StreamReader(ctx.Request.Body, Encoding.UTF8))
-                {
-                    var requestBody = reader.ReadToEndAsync();
-
-                    // Create an HttpContent from the request body
-                    var requestContent = new StringContent(requestBody.Result, Encoding.UTF8, "application/json");
-                    await SendHandler.SendRawData(requestContent).ConfigureAwait(true);
-                }
+                await SendHandler.SendRawData(requestContent).ConfigureAwait(true);
 
             })
             .WithName("Download Image")
