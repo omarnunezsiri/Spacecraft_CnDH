@@ -2,9 +2,9 @@ name: Capacity/Performance Test
 
 on:
     push:
-        branches: [main]
+        branches: [main, feature-ticket-#948-performance-testing]
     pull_request:
-        branches: [main]
+        branches: [main, feature-ticket-#948-performance-testing]
 
 jobs:
   capacitytest:
