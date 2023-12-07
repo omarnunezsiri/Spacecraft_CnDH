@@ -39,7 +39,9 @@ jobs:
             sleep 5s
 
     - name: Run tests
-      run: locust -f test_capacity.py --headless -u 100 -r 15 --host http://localhost:8080 --run-time 1m --html=locustreport.html
+      run: |
+          cd JAPI
+          locust -f test_capacity.py --headless -u 100 -r 15 --host http://localhost:8080 --run-time 1m --html=locustreport.html
 
     - name: Archive capacity test report
       uses: actions/upload-artifact@v3
